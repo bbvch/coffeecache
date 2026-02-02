@@ -97,7 +97,6 @@ const config: Config = {
     navbar: {
       title: '☕ Coffee Cache by bbv',
       items: [
-        { href: 'https://bbv.ch', label: 'bbv', position: 'right' },
         { href: 'https://bbv.ch/insights/academy/', label: 'Academies', position: 'right' },
         { href: 'https://bbv.ch/career/arbeiten-bei-bbv/', label: 'Join us', position: 'right' },
         { to: '/tags', label: 'Tags', position: 'right' },
