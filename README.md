@@ -1,4 +1,4 @@
-# bbv TechBlog
+# Coffee cache by bbv
 
 A simple, engineer-driven technical blog (Docusaurus) for sharing posts, tutorials, sample code, and videos.
 
