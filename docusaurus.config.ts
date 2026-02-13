@@ -39,6 +39,17 @@ const config: Config = {
     mermaid: true,
   },
   themes: ['@docusaurus/theme-mermaid'],
+  plugins: [
+    [
+      "@dipakparmar/docusaurus-plugin-umami",
+      /** @type {import('@dipakparmar/docusaurus-plugin-umami').Options} */
+      ({
+        websiteID: "3b9f7e29-f0c8-48d0-91e9-c3fb88f2c382", // Required
+        analyticsDomain: "cloud.umami.is", // Required
+        dataDomains: "techinsights.bbv.ch", // Optional, comma separated list of domains, *Recommended*
+      }),
+    ],
+  ],
   presets: [
     [
       'classic',
@@ -71,12 +82,6 @@ const config: Config = {
         },
       } satisfies Preset.Options,
     ],
-  ],
-  scripts: [
-    {
-      src: 'https://nullitics.com/script.js',
-      async: true,
-    },
   ],
 
   themeConfig: {
