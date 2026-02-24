@@ -25,6 +25,7 @@ function YouTubeEmbed({ videoId, title = 'YouTube video player', width = 560, he
           position: 'absolute',
           top: 0,
           left: 0,
+          margin: '10px auto', 
           width: '100%',
           height: '100%',
         }}
