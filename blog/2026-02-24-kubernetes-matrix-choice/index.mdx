@@ -13,7 +13,7 @@ import CenteredImage from '@site/src/components/Image';
 
 ## The Red Pill and Blue Pill
 
-If you haven't seen The Matrix, go watch it. It's worth it.
+If you haven't seen The Matrix, watch it. It's worth it.
 
 Spoiler alert:
 
@@ -81,7 +81,7 @@ Go to a conference, read a blog, or watch a Kubernetes video. You will see all t
 If you are lucky, someone will actually explain why they picked Kubernetes.
 Most of the time, it is not clear what problem they were solving, or if Kubernetes was just the shiny new thing.
 You see a demo: a simple app, a few lines of YAML, and it looks like magic.
-You think this looks great. Maybe you want it for your company. Maybe you just want it on your CV.
+You think this looks great. Maybe you want it for your company. Maybe you want it on your CV.
 
 ```yaml
 apiVersion: apps/v1
@@ -114,7 +114,7 @@ So what is all this complexity people keep warning about?
 Depending on your role in the organization, you will face different challenges and trade-offs when adopting Kubernetes.
 
 #### Developers
-As a developer, you might see Kubernetes as a way to easily deploy and manage your applications. You can define your application declaratively using YAML and let Kubernetes manage the rest.
+As a developer, you might see Kubernetes as a way to deploy and manage your applications easily. You can define your application declaratively using YAML and let Kubernetes manage the rest.
 
 However, you might miss:
 
@@ -134,17 +134,18 @@ As an operations team, you might see Kubernetes as a single tool for managing yo
 However, you might miss:
 
 * Security compliance: auditing, rbac, network policies
-* Cost control: Overprovisioning. provide scalable
-* Maintenance: Upgrades and maintenance of nodes
-* Operational overhead: You might need a full-time engineer just to keep clusters and core services running. Some teams spend 10 to 30 hours per cluster per month on basic maintenance. That does not include upgrades or unexpected incidents. Costs add up fast with management tools, cloud resources, and on-call. One incident or upgrade can eat days.
+* Cost control: over-provisioning
+* Maintenance: upgrades and maintenance of nodes
+* Operational overhead: You might need a full-time engineer to keep clusters and core services running. Some teams spend 10 to 30 hours per cluster per month on basic maintenance. That does not include upgrades or unexpected incidents. Costs add up fast with management tools, cloud resources, and on-call. One incident or upgrade can eat days.
 
 #### Architects
 
-As an architect, you might see Kubernetes as a way to gain flexibility, scalability, and availability, along with a rich ecosystem. Maybe you see a way to reduce the vendor lock-in. Or you want to run a Netflix microservice architecture reliably. 
+As an architect, you might see Kubernetes as a way to gain flexibility, scalability, and availability, along with a rich ecosystem. 
+You may see a way to reduce the vendor lock-in. Or you want to run a Netflix microservice architecture reliably. 
 
 However, you might miss:
 
-* Vendor lock-in: Yes, Kubernetes allows you to port your solution. Based on our experience, you cannot easily move from one hyperscaler to another. The YAML files for your apps will not change, but the cluster setup will. You are locked in by your knowledge, contracts, and ecosystem. Read this article about [vendor lock-in (German)](https://bbv.ch/insights/blog/vendor-lock-in).
+* Vendor lock-in: Yes, Kubernetes allows you to port your containerized apps. Based on our experience, you cannot easily move from one hyperscaler to another. The YAML files for your apps will not change, but the cluster setup will. Your knowledge, contracts, and ecosystem lock you in. Read more about[vendor lock-in here (German)](https://bbv.ch/insights/blog/vendor-lock-in).
 * Operational burden and skilled teams
 * Security and compliance complexity
 * Not all workloads fit: legacy apps or stateful workloads are challenging
