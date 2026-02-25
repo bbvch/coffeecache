@@ -10,6 +10,7 @@ function YouTubeEmbed({ videoId, title = 'YouTube video player', width = 560, he
         position: 'relative',
         paddingBottom: aspectRatioPadding, // For 16:9, this would be '56.25%'
         height: 0,
+        marginBottom: '20px', // Add some spacing below the video
         overflow: 'hidden',
         maxWidth: '100%',
         backgroundColor: 'black', // Placeholder background
