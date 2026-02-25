@@ -15,11 +15,11 @@ import CenteredImage from '@site/src/components/Image';
 
 If you haven't seen The Matrix, watch it. It's worth it.
 
-Spoiler alert:
+The Matrix is a sci-fi action movie about a hacker named Neo who learns that reality is a simulation run by machines. With Morpheus and Trinity, he struggles to free humans from this illusion. However, he must first make a crucial decision:
 
 <YouTubeEmbed videoId="zE7PKRjrid4" title="Matrix sceene - red or blue pill" width="800" height="450" />
 
-Blue pill: comfortable illusion. Red pill: uncomfortable reality.
+**Blue pill**: comfortable illusion. **Red pill**: uncomfortable reality.
 
 So what does this have to do with Kubernetes? Picking Kubernetes is the same kind of choice.
 
@@ -62,7 +62,6 @@ A second later, she turns into an agent and tries to kill him.
 
 <CenteredImage 
   src={require("./images/blonde-woman-in-red-dress.jpeg").default}
-  alt="Mein Bild" 
   width={500}
   caption="Blonde woman in red dress from The Matrix"
   imageSource='https://matrix.fandom.com/wiki/Woman_in_Red'
@@ -118,12 +117,12 @@ As a developer, you might see Kubernetes as a way to deploy and manage your appl
 
 However, you might miss:
 
-* Logging & debugging: When something goes wrong, it can be difficult to figure out what happened and how to fix it.
-* Container basics: write Dockerfiles, build and tag images, run containers locally, multi-stage builds, tools like Docker, Podman, Rancher
-* Pods vs. Deployments:  Rolling updates, Replica Sets, Scaling, Rollbacks
-* Configuration management: ConfigMaps & Secrets
-* Health Checks: Liveness Probe vs Readiness Probe
-* YAML: Write and read ;)
+* **Logging & debugging**: When something goes wrong, it can be difficult to figure out what happened and how to fix it.
+* **Container basics**: write Dockerfiles, build and tag images, run containers locally, multi-stage builds, tools like Docker, Podman, Rancher
+* **Pods vs. Deployments**:  Rolling updates, Replica Sets, Scaling, Rollbacks
+* **Configuration management**: ConfigMaps & Secrets
+* **Health Checks**: Liveness Probe vs Readiness Probe
+* **YAML**: Write and read ;)
 
 You might not see the learning curve. It takes real time and effort to learn Kubernetes well enough to run your apps.
 
@@ -133,10 +132,10 @@ As an operations team, you might see Kubernetes as a single tool for managing yo
 
 However, you might miss:
 
-* Security compliance: auditing, rbac, network policies
-* Cost control: over-provisioning
-* Maintenance: upgrades and maintenance of nodes
-* Operational overhead: You might need a full-time engineer to keep clusters and core services running. Some teams spend 10 to 30 hours per cluster per month on basic maintenance. That does not include upgrades or unexpected incidents. Costs add up fast with management tools, cloud resources, and on-call. One incident or upgrade can eat days.
+* **Security compliance**: auditing, rbac, network policies
+* **Cost control**: over-provisioning
+* **Maintenance**: upgrades and maintenance of nodes
+* **Operational overhead**: You might need a full-time engineer to keep clusters and core services running. Some teams spend 10 to 30 hours per cluster per month on basic maintenance. That does not include upgrades or unexpected incidents. Costs add up fast with management tools, cloud resources, and on-call. One incident or upgrade can eat days.
 
 #### Architects
 
@@ -145,10 +144,10 @@ You may see a way to reduce the vendor lock-in. Or you want to run a Netflix mic
 
 However, you might miss:
 
-* Vendor lock-in: Yes, Kubernetes allows you to port your containerized apps. Based on our experience, you cannot easily move from one hyperscaler to another. The YAML files for your apps will not change, but the cluster setup will. Your knowledge, contracts, and ecosystem lock you in. Read more about[vendor lock-in here (German)](https://bbv.ch/insights/blog/vendor-lock-in).
-* Operational burden and skilled teams
-* Security and compliance complexity
-* Not all workloads fit: legacy apps or stateful workloads are challenging
+* **Vendor lock-in**: Yes, Kubernetes allows you to port your containerized apps. Based on our experience, you cannot easily move from one hyperscaler to another. The YAML files for your apps will not change, but the cluster setup will. Your knowledge, contracts, and ecosystem lock you in. Read more about[vendor lock-in here (German)](https://bbv.ch/insights/blog/vendor-lock-in).
+* **Operational burden and skilled teams**
+* **Security and compliance complexity**
+* **Not all workloads fit**: legacy apps or stateful workloads are challenging
 
 #### Customers
 
