@@ -12,7 +12,7 @@ export default function Comments(): JSX.Element {
         repo="bbvch/techinsights"
         repoId="R_kgDORFJJwQ"
         category="Announcements"
-        categoryId="DIC_kwDORFJJwc4C1qdg"
+        categoryId="DIC_kwDORFJJwc4C1qdf"
         mapping="pathname"
         strict="0"
         reactions-enabled="1"

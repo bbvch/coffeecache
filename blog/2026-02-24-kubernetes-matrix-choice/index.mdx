@@ -1,6 +1,6 @@
 ---
 title: "The Kubernetes Matrix: Red Pill or Blue Pill?"
-description: "Why Kubernetes might not be your default. Trade-offs, alternatives and when to actually use orchestration."
+description: "Why Kubernetes might not be your default and when to actually use orchestration."
 authors:
   - shpendkelmendi
   - joachimjabs
@@ -26,7 +26,7 @@ So what does this have to do with Kubernetes? Picking Kubernetes is the same kin
 |Take the **Blue Pill** if you think|Take the **Red Pill** if you think|
 |-|-|
 |*Kubernetes solves all my problems.*|*Kubernetes is very powerful but adds complexity, which is not necessary for current requirements. Let's start simple.*|
-|*It's the future - all big companies use it.*|*Big companies have big problems and big teams. Your startup with 5 developers has different needs than Google.*|
+|*It's the future - all big companies use it.*|*Big companies have big problems and big teams. Your team with 5 developers has different needs than Google.*|
 |*No vendor lock-in - we stay flexible.*|*You trade cloud vendor lock-in for Kubernetes ecosystem lock-in. Plus managed k8s still ties you to a provider.*|
 |*We need it to stay competitive.*|*Competitive advantage comes from solving customer problems, not from adopting the latest technology hype.*|
 |*It scales infinitely.*|*It can scale, but you need the team, monitoring, and infrastructure to support it. And this is not cheap.*|
@@ -120,9 +120,10 @@ However, you might miss:
 * **Logging & debugging**: When something goes wrong, it can be difficult to figure out what happened and how to fix it.
 * **Container basics**: write Dockerfiles, build and tag images, run containers locally, multi-stage builds, tools like Docker, Podman, Rancher
 * **Pods vs. Deployments**:  Rolling updates, Replica Sets, Scaling, Rollbacks
-* **Configuration management**: ConfigMaps & Secrets
+* **Configuration management**: ConfigMaps & Secrets, Environments
 * **Health Checks**: Liveness Probe vs Readiness Probe
 * **YAML**: Write and read ;)
+* **Templating**: Helm, Go Templating, Kustomize
 
 You might not see the learning curve. It takes real time and effort to learn Kubernetes well enough to run your apps.
 
@@ -144,7 +145,7 @@ You may see a way to reduce the vendor lock-in. Or you want to run a Netflix mic
 
 However, you might miss:
 
-* **Vendor lock-in**: Yes, Kubernetes allows you to port your containerized apps. Based on our experience, you cannot easily move from one hyperscaler to another. The YAML files for your apps will not change, but the cluster setup will. Your knowledge, contracts, and ecosystem lock you in. Read more about[vendor lock-in here (German)](https://bbv.ch/insights/blog/vendor-lock-in).
+* **Vendor lock-in**: Yes, Kubernetes allows you to port your containerized apps. Based on our experience, you cannot easily move from one hyperscaler to another. The YAML files for your apps will not change, but the cluster setup will. Your knowledge, contracts, and ecosystem lock you in. Read more about [vendor lock-in here (German)](https://bbv.ch/insights/blog/vendor-lock-in).
 * **Operational burden and skilled teams**
 * **Security and compliance complexity**
 * **Not all workloads fit**: legacy apps or stateful workloads are challenging
@@ -180,7 +181,6 @@ Let me give you an example of what I mean by constraints and quality attributes:
   * security,
   * maintainability,
   * … and many more.
-
 
 
 1. **Understand the sandbox**
