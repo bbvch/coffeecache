@@ -17,9 +17,9 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
 
 ## How to contribute a blog post
 
-1. Announce your blog post idea in the project with an issue. 
+1. Announce your blog post idea in the project with an issue.
 2. Ready to write? Assign it to yourself and set it in progress
-3. Fork the repo and create a branch for your post.
+3. Fork the repo and create a branch (e.g. `blog/my-post-slug`) for your post.
 4. Add yourself as an author in `blog/authors.json` if not already present.
 5. Add a dated folder under `blog/` following the pattern `YYYY-MM-DD-your-slug/`.
    1. Place the post in `index.md` (or `index.mdx`)
@@ -30,7 +30,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    2. Reference the issue you created in step 1.
    3. If you want ask somebody for a review.
    4. CI checks passed?
-   5. Coordinate with maintainers to schedule the publish date (if desired) and merge when ready.
+   5. Coordinate with maintainers to schedule the publish date (if desired) and merge when ready. As soon as it's merged, it will be live on the blog! No need to wait for a specific publish date.
 7. Congrats, you published your post! Share it widely and engage with readers in the comments.
 
 ### Frontmatter example
@@ -46,6 +46,16 @@ tags: [tag1, tag2]
 image: ./images/cover.png
 ---
 ```
+
+### Cross-posting
+
+- You can cross-post your content to other platforms, such as LinkedIn, Reddit, Medium, and dev.to. When cross-posting, please link back to the original post on our blog with a canonical URL to drive traffic and engagement.
+- You can cross-post content originally posted on your personal blog here. If you do, please add the following to your blog post (MDX file):
+   ```html
+   <head>
+   <link rel="canonical" href="https://your-original-blog-post-page.com/docs/my-post-slug" />
+   </head>
+   ```
 
 ### Author and tag registry
 
