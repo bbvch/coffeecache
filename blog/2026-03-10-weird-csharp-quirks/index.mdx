@@ -4,6 +4,7 @@ description: "Why some C# defaults might be insane and how to deal with that."
 authors:
   - jeremymeier
 tags: [C#, code-quality, static-analysis, architecture-testing, pit-of-success]
+image: ./images/cover.png
 ---
 
 ## One of the Problems with C#
@@ -11,7 +12,7 @@ tags: [C#, code-quality, static-analysis, architecture-testing, pit-of-success]
 C# is a language with a long and rather diverse history. It can be used in your run-of-the-mill business applications, for game-dev, frontend with Blazor. It is cloud-native, OO, FP and just generally "everything"-ready.
 
 Now that we covered all the buzzwords (and did the SEO optimization), yes, C# is quite a useful language. In recent years C# got great additions like:
-- records: finally a sane default for `ToString` and equality and "immutability semantics"
+- records: finally a sane default equality and "immutability semantics"
 - pattern matching: solving problems by transforming data instead of nesting conditionals five levels deep
 - nullable reference types: understanding code is so much simpler if I don't have to keep in mind that ANYTHING could be null
 
@@ -37,7 +38,7 @@ To actually make the wrong thing more difficult and the right thing easier, we u
 
 ### Records Are Inheritable by Default
 
-A record is really just syntactic sugar for a class with some sane defaults (like ToString, equality etc).
+A record is really just syntactic sugar for a class with a sane default for equality and a less useless ToString default.
 Semantically records represent the idea of "just data", for some, including my team, even immutable data. Having the concept of inheritance for "just data" seems unnecessarily complex.
 In order to not deviate too far from "normal" classes, the C# language design team decided to leave many of the defaults from classes intact, including "inheritable by default".
 
@@ -332,7 +333,7 @@ public void AllServicesCanBeResolvedInBackend()
 }
 ```
 
-This test runs on every build, not when your user hits the one code path you forgot to test.
+We run this test in every CI build, not when your user hits the one code path you forgot to test.
 
 ### Extension Blocks Split Parameters Across Two Locations
 
