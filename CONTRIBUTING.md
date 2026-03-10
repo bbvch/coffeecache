@@ -17,7 +17,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
 
 ## How to contribute a blog post
 
-1. Announce your blog post idea in the project with an issue.
+1. Announce your blog post idea in the [project](https://github.com/orgs/bbvch/projects/5) with an new work item.
 2. Ready to write? Assign it to yourself and set it in progress
 3. Fork the repo and create a branch (e.g. `blog/my-post-slug`) for your post.
 4. Add yourself as an author in `blog/authors.json` if not already present.
@@ -27,7 +27,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    3. Put images in a local `images/` subfolder and reference them relatively (e.g., `./images/cover.png`).
 6. Ready for review/publish?
    1. Open a Pull Request
-   2. Reference the issue you created in step 1.
+   2. Reference the work item you created in step 1.
    3. If you want ask somebody for a review.
    4. CI checks passed?
    5. Coordinate with maintainers to schedule the publish date (if desired) and merge when ready. As soon as it's merged, it will be live on the blog! No need to wait for a specific publish date.
@@ -78,7 +78,7 @@ image: ./images/cover.png
 
 ## Support & questions
 
-- For help with the publishing workflow, CI, or tooling, open an issue or tag a maintainer in your PR.
+- For help with the publishing workflow, CI, or tooling, contact or tag a maintainer in your PR.
 
 ## Thanks!
 
