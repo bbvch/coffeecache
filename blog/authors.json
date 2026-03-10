@@ -12,7 +12,7 @@
       "github": "shpendke",
       "sessionize": "https://sessionize.com/shpendke"
     }
-  },  
+  },
   "joachimjabs": {
     "name": "Joachim Jabs",
     "title": "Senior DevOps Engineer & Cloud Architect",
@@ -21,5 +21,17 @@
     "image": "",
     "imageURL": "/img/authors/JoachimJabs.jpg",
     "page": true
+  },
+  "jeremymeier": {
+    "name": "Jeremy Meier",
+    "title": "Software Engineer",
+    "description": "Jeremy Meier is a software engineer with bbv Software Services AG. He is convinced that software quality is a key ingredient of successful products. For that reason he teaches and shares experience with anyone willing to learn about designing a software system.",
+    "url": "https://github.com/wtjerry",
+    "image": "",
+    "imageURL": "/img/authors/JeremyMeier.jpg",
+    "page": true,
+    "socials": {
+      "github": "wtjerry"
+    }
   }
 }
