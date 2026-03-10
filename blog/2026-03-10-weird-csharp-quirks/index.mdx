@@ -191,7 +191,16 @@ public void ClassesShouldNotHavePropertiesWithSettersOrInitAccessors()
 
 ### List\<T>.ForEach Silently Eats Async
 
-`List<T>.ForEach(Action<T>)` takes an `Action<T>`. However, you can pass an async lambda, which is of type `Func<Task>`, and it gets implicitly cast to `Action`. That means nobody awaits the Tasks. Because C# uses hot Tasks, the actual logic is at least started. But because nobody awaits it, we don't control in which order they are synchronized or whether they are synchronized at all.
+`List<T>.ForEach(Action<T>)` takes an `Action<T>`. However, you can pass an async lambda, which is of type `Func<Task>`, and it gets implicitly cast to `Action`. 
+That means nobody awaits the Tasks. 
+Because C# uses hot Tasks, the actual logic is at least started. But because nobody awaits it, 
+we don't control in which order they are synchronized or whether they are synchronized at all.
+
+The faulting behaviour of those Tasks is also tricky: if a task faults because of an exception, nothing immediately happens.
+Once GC cleans the task up, it depends on the dotnet version you have what happens:
+
+- up until .Net FullFramework 4.0, the whole application crashes.
+- after .Net FullFramework 4.0, the event TaskScheduler.UnobservedTaskException is triggered, but the application swallows the exception otherwise.
 
 All in all, the code compiles, it looks correct at first glance, and you are going to have a bad time when this bug hits production.
 
