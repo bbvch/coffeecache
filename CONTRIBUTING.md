@@ -17,7 +17,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
 
 ## How to contribute a blog post
 
-1. Announce your blog post idea in the [project](https://github.com/orgs/bbvch/projects/5) with an new work item.
+1. Announce your blog post idea in the [project](https://github.com/orgs/bbvch/projects/5) with an draft item.
 2. Ready to write? Assign it to yourself and set it in progress
 3. Fork the repo and create a branch (e.g. `blog/my-post-slug`) for your post.
 4. Add yourself as an author in `blog/authors.json` if not already present.
