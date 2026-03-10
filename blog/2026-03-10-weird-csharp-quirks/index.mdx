@@ -40,7 +40,7 @@ To actually make the wrong thing more difficult and the right thing easier, we u
 
 A record is really just syntactic sugar for a class with a sane default for equality and a less useless ToString default.
 Semantically records represent the idea of "just data", for some, including my team, even immutable data. Having the concept of inheritance for "just data" seems unnecessarily complex.
-In order to not deviate too far from "normal" classes, the C# language design team decided to leave many of the defaults from classes intact, including "inheritable by default".
+To avoid deviating too far from "normal" classes, the [C# language design team decided](https://devblogs.microsoft.com/dotnet/csharp-primary-constructors-refactoring/?commentid=20708#comment-20708) to leave many of the defaults from classes intact, including "inheritable by default".
 
 Because the C# default doesn't match with how we think about records, we just enforce that records are sealed by default.
 
