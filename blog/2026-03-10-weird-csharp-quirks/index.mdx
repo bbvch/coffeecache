@@ -95,7 +95,7 @@ The last additions are:
 - TimeSpan for .. well a span of time
 - TimeProvider to get the current time and date
 
-Previously we had `DateTime.Now` and `DateTime.UtcNow` which are static properties. They lead to difficult to test code.
+Previously, we used `DateTime.Now` and `DateTime.UtcNow`, which are static properties. They make the code difficult to test.
 They also deal with `DateTime`, which doesn't carry timezone information.
 
 There were 100s of libraries providing a "getting the current date and time"-abstraction, in addition to the one every company had built itself.
