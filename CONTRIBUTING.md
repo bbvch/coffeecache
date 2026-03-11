@@ -28,17 +28,17 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
 1. Announce your blog post idea in the [project (backlog column)](https://github.com/orgs/bbvch/projects/5) with an draft item.
 2. Ready to write? Convert the draft item to an issue. Assign it to yourself and set it in progress in project board.
 3. Create a branch (e.g. `blog/my-post-slug`) for your blog post.
-4. Add a dated folder under `blog/` following the pattern `YYYY-MM-DD-your-slug/`.
+4. Add a dated folder under `blog/` following the pattern `YYYY-MM-DD-your-slug/`. Use the date you created your post. This date is primarily used for sorting blog posts in the directory and will be the default publish date. If the publish date differs from the date used in the folder, override the publish date with `date` in the frontmatter.
    1. Place the post in `index.md` (or `index.mdx`)
    2. Include frontmatter (title, description, authors, tags, image) in your post
    3. Put images in a local `images/` subfolder and reference them relatively (e.g., `./images/cover.png`).
-5.  Ready for review/publish?
+5. Ready for review/publish?
    1. Open a Pull Request
-   2. Reference the work item you created in step 1 by mentioning in PR with #<issue-number>.
+   2. Reference the work item you created in step 1 by mentioning in PR with #{issue-number}.
    3. If you want, ask somebody for a review.
    4. CI checks passed? Go to next step.
    5. Coordinate with @bbv-blog-admin (github team) to schedule the publish date. When approved by somebody form @bbv-blog-admin. You can merge. As soon as it's merged, it will be live on the blog! No need to wait for a specific publish date.
-6.  Congrats, you published your post! Share it widely and engage with readers in the comments.
+6. Congrats, you published your post! Share it widely and engage with readers in the comments.
 
 ### Frontmatter example
 
