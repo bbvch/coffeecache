@@ -17,21 +17,28 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
 
 ## How to contribute a blog post
 
-1. Announce your blog post idea in the [project](https://github.com/orgs/bbvch/projects/5) with an draft item.
-2. Ready to write? Assign it to yourself and set it in progress
-3. Fork the repo and create a branch (e.g. `blog/my-post-slug`) for your post.
-4. Add yourself as an author in `blog/authors.json` if not already present.
-5. Add a dated folder under `blog/` following the pattern `YYYY-MM-DD-your-slug/`.
+### First time contributing?
+
+1. Request to join the [@bbv-blogger team](https://github.com/orgs/bbvch/teams/bbv-blogger) if not already a member.
+2. Clone the repo and setup your local environment. Follow instructions in [README.md](README.md).
+3. Add yourself as an author in `blog/authors.json` if not already present.
+
+## Publishing workflow
+
+1. Announce your blog post idea in the [project (backlog column)](https://github.com/orgs/bbvch/projects/5) with an draft item.
+2. Ready to write? Convert the draft item to an issue. Assign it to yourself and set it in progress in project board.
+3. Create a branch (e.g. `blog/my-post-slug`) for your blog post.
+4. Add a dated folder under `blog/` following the pattern `YYYY-MM-DD-your-slug/`.
    1. Place the post in `index.md` (or `index.mdx`)
    2. Include frontmatter (title, description, authors, tags, image) in your post
    3. Put images in a local `images/` subfolder and reference them relatively (e.g., `./images/cover.png`).
-6. Ready for review/publish?
+5.  Ready for review/publish?
    1. Open a Pull Request
-   2. Reference the work item you created in step 1.
-   3. If you want ask somebody for a review.
-   4. CI checks passed?
-   5. Coordinate with maintainers to schedule the publish date (if desired) and merge when ready. As soon as it's merged, it will be live on the blog! No need to wait for a specific publish date.
-7. Congrats, you published your post! Share it widely and engage with readers in the comments.
+   2. Reference the work item you created in step 1 by mentioning in PR with #<issue-number>.
+   3. If you want, ask somebody for a review.
+   4. CI checks passed? Go to next step.
+   5. Coordinate with @bbv-blog-admin (github team) to schedule the publish date. When approved by somebody form @bbv-blog-admin. You can merge. As soon as it's merged, it will be live on the blog! No need to wait for a specific publish date.
+6.  Congrats, you published your post! Share it widely and engage with readers in the comments.
 
 ### Frontmatter example
 
@@ -41,7 +48,7 @@ title: "My Post Title"
 description: "Short description for the blog list card" # SEO purpose, used in BlogListPage cards
 authors:
   - autherkey  # from blog/authors.yml
-date: 2026-01-21
+date: 2026-01-21 # publish date, visible in blog
 tags: [tag1, tag2]
 image: ./images/cover.png
 ---
