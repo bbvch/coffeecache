@@ -100,7 +100,7 @@ They also deal with `DateTime`, which doesn't carry timezone information.
 
 There were 100s of libraries providing a "getting the current date and time"-abstraction, in addition to the one every company had built itself.
 
-The .NET documentation does recommend using the newer types, but the guidance is inconsistent, and the framework itself doesn't enforce it. So we just banned the whole type:
+The [.NET documentation does recommend using the newer types](https://learn.microsoft.com/en-us/dotnet/standard/datetime/choosing-between-datetime), but the guidance is inconsistent, and the framework itself doesn't enforce it. So, we just banned the whole type:
 
 ```
 # BannedSymbols.Microsoft.CodeAnalysis.BannedApiAnalyzer.txt
