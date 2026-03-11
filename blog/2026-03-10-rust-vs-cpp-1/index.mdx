@@ -1,0 +1,219 @@
+---
+title: "Rust vs C++"
+description: "Rust trifft auf modernes C++: Ternary Twist"
+authors:
+  - oliverwith
+tags: [rust, c++]
+image: ./images/rustacean.png
+---
+
+
+
+# Rust trifft auf modernes C++
+
+*Oder: Wie zwei Entwickler entdecken, dass sie mehr gemeinsam haben als gedacht*
+
+Es ist Montagnachmittag in der Cafeteria. Sarah, frisch von einem Rust-Projekt zurück, trifft auf Marco, der gerade sein Legacy-Projekt auf C++20 portiert hat. Beide sind in bester Diskutierlaune.
+
+{/* truncate */}
+---
+
+## Der Ternary-Twist
+
+**Marco:** "Rust hat nicht mal einen Ternary-Operator! Den hat sogar C!"
+
+**Sarah:** "Brauchen wir auch nicht."
+
+```rust
+// Rust: if ist eine Expression
+let timeout = if temperature > 150 { 5000 } else { 100 };
+```
+
+**Marco:** "Okay, schön. Wir haben das aber kürzer:"
+
+```cpp
+// C++: Der klassische ternary
+auto timeout = temperature > 150 ? 5000 : 100;
+```
+
+**Sarah:** "Und was machst du bei sowas?"
+
+```rust
+let retries = match (production, critical) {
+    (true, true) => 5,
+    (true, false) => 3,
+    (false, _) => 1,
+};
+```
+
+**Marco:** "Äh... verschachtelte ternaries? Oder ein immediately invoked lambda?"
+
+```cpp
+auto retries = [&]() {
+    if (production && critical) return 5;
+    if (production) return 3;
+    return 1;
+}();
+```
+
+**Sarah:** "Ein Lambda das du sofort aufrufst? Ernsthaft?"
+
+**Marco:** "Hey, C++ kann alles! Nur... manchmal etwas umständlich."
+
+### Fazit
+
+Der Ternary ist ganz nett für simple Fälle. Aber weil in Rust `if`-Statements Expressions sind, braucht es dieses Extrakonstrukt gar nicht.
+
+
+### Exkurs: Expression vs. Statement in Rust
+
+**Der fundamentale Unterschied:**
+- **Expression** = wird zu einem Wert ausgewertet (z.B. `5 + 3`, `if x { 10 } else { 20 }`)
+- **Statement** = führt eine Aktion aus, hat keinen Wert (z.B. `let x = 5;`)
+
+**Die magische Rolle des Semikolons:**
+```rust
+// Expression: Gibt einen Wert zurück
+let x = {
+    5 + 3  // Kein Semikolon → Expression, ergibt 8
+};
+
+// Statement: Gibt () zurück
+let y = {
+    5 + 3;  // Mit Semikolon → Statement, y hat Typ ()
+};
+```
+
+Salopp gesagt, degradiert in Rust das Semikolon eine Expression zum Statement. Deshalb funktioniert:
+```rust
+fn add(a: i32, b: i32) -> i32 {
+    a + b      // Expression, wird zurückgegeben
+}
+
+fn add(a: i32, b: i32) -> i32 {
+    a + b;     // Statement, gibt () statt i32 zurück
+}
+```
+
+Das ist auch der Grund, warum `if`, `match`, `loop` und sogar Blöcke `{}` in Rust Werte zurückgeben können – sie sind alle Expressions. In C++ sind das Statements, weshalb man ein Extrakonstrukt wie den ternary operator braucht.
+
+
+---
+
+
+## Slices und Ranges – Elegant auf Teilstücke zugreifen
+
+**Sarah:** "Lass uns mal über Slices reden. Slices sind extrem praktisch, um einen Ausschnitt aus einer Datenstruktur auszuleihen."
+
+**Marco:** "Wir haben seit C++20 auch Ranges! Endlich lazy evaluation."
+
+**Sarah:** "Zeig mal."
+
+### Das Problem: Ein Teilstück eines Arrays verarbeiten
+
+Szenario: Wir haben einen Container, zum Beispiel einen Vektor mit Zahlen, und wollen nur einen Teil davon verarbeiten ohne eine Kopie des Containers zu erstellen.
+Der Verarbeitungsschritt ist im Beispiel alle ungeraden Zahlen zwischen Index 2 und 7 aufsummieren
+
+### Rust: Slices
+
+Slices sind ein fix eingebautes Feature des Sprachumfangs von Rust
+
+```rust
+fn main() {
+    let data = vec![1, 2, 3, 5, 7, 8, 11, 13, 16, 20];
+
+    // Slice: Nimm Elemente von Index 2 bis 7 (exklusiv)
+    let slice = &data[2..7];
+
+    // Summiere ungerade Zahlen
+    let sum: i32 = slice.iter()
+        .filter(|&&n| n % 2 != 0)
+        .sum();
+
+     println!("Summe der ungeraden: {}", sum);
+}
+```
+
+**Sarah:** "Direkte Syntax: `&data[2..7]`. Fertig."
+
+### C++: Ranges oder Iteratoren
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <ranges>
+
+int main() {
+    std::vector<int> data = {1, 2, 3, 5, 7, 8, 11, 13, 16, 20};
+
+    // Variante 1: Mit ranges (C++20, braucht -std=c++20)
+    auto slice_ranges = data | std::views::drop(2) | std::views::take(5);
+    auto odd_ranges = slice_ranges
+        | std::views::filter([](int n) { return n % 2 != 0; });
+
+    int sum_ranges = 0;
+    for (auto n : odd_ranges) {
+        sum_ranges += n;
+    }
+    std::cout << "Summe ungerade (ranges): " << sum_ranges << "\n";
+
+    // Variante 2: Mit klassischen Iteratoren
+    auto slice_begin = data.begin() + 2;
+    auto slice_end = data.begin() + 7;
+
+    int sum_iter = 0;
+    for (auto it = slice_begin; it != slice_end; ++it) {
+        if (*it % 2 != 0) {
+            sum_iter += *it;
+        }
+    }
+    std::cout << "Summe ungerade (iteratoren): " << sum_iter << "\n";
+}
+```
+
+**Marco:** "Ranges funktionieren... aber ich muss `drop(2)` und `take(5)` kombinieren."
+
+**Sarah:** "Warum nicht einfach `data[2..7]`?"
+
+**Marco:** "Das geht nicht. Wir haben keine Slice-Syntax. Dafür kann ich zwischen Ranges und Iteratoren wählen!"
+
+### Der Unterschied
+
+**Sarah:** "Der Punkt ist: Slices sind bei Rust von Anfang an eingebaut. Teil der Sprache."
+
+```rust
+// Verschiedene Slice-Notationen
+&data[2..7]      // Von 2 bis 7 (exklusiv)
+&data[2..]       // Von 2 bis Ende
+&data[..7]       // Von Anfang bis 7 (exklusiv)
+&data[..]        // Alles
+```
+
+**Marco:** "Bei uns kam das mit C++20 nach. Und es braucht `-std=c++20` als Compiler-Flag."
+
+**Sarah:** "Und `views::drop(2) | views::take(5)` ist nicht gerade intuitiv."
+
+**Marco:** "Stimmt. Aber immerhin haben wir's jetzt! Und C++ kann alles... nur manchmal etwas umständlich."
+
+### Lazy Evaluation
+
+**Sarah:** "Wenigstens sind beide lazy – kein Zwischenarray wird erstellt."
+
+**Marco:** "Ja! Das war ein großer Fortschritt. Früher mussten wir alles kopieren."
+
+**Sarah:** "Okay, C++ Ranges sind definitiv eine Verbesserung."
+
+### Fazit
+
+Beide Sprachen haben Konzepte für Teilstücke von Sequenzen:
+- **Rust:** Native Slice-Syntax `&data[2..7]`, Teil der Sprache seit Tag 1
+- **C++:** Ranges seit C++20 (braucht `-std=c++20`), oder klassische Iteratoren
+
+**Der Unterschied:** Rust hat Slices von Grund auf eingebaut mit direkter, intuitiver Syntax. C++ hat Ranges nachgerüstet – funktioniert, aber mit umständlicherer Syntax (`drop`/`take` statt direkter Range-Notation).
+
+**Für Legacy-Code:** C++ kann auf Iteratoren zurückfallen, die seit Jahrzehnten existieren.
+
+### Code Samples zu Slices
+
+- [C++ Beispiel bei godbolt](https://godbolt.org/z/r55oc4dea)
+- [Rust Beispiel im rustplayground](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=a850df5a96c7391064a781b3514025f5)

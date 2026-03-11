@@ -12,7 +12,7 @@
       "github": "shpendke",
       "sessionize": "https://sessionize.com/shpendke"
     }
-  },  
+  },
   "joachimjabs": {
     "name": "Joachim Jabs",
     "title": "Senior DevOps Engineer & Cloud Architect",
@@ -21,5 +21,18 @@
     "image": "",
     "imageURL": "/img/authors/JoachimJabs.jpg",
     "page": true
+  },
+  "oliverwith": {
+    "name": "Oliver With",
+    "title": "Senior Software Engineer",
+    "description": "siebesiech",
+    "url": "https://www.linkedin.com/in/oliver-with/",
+    "imageURL": "/img/authors/OliverWith.jpg",
+    "page": true,
+    "image": "",
+    "socials": {
+      "linkedin": "oliver-with",
+      "github": "quattervals"
+    }
   }
 }
