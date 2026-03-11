@@ -26,13 +26,7 @@ The term "pit of success" comes from Rico Mariani. It describes that, when the e
 
 If we do not have a system using that approach, the right and wrong things are "hidden" and/or implicit. They might be written down in some documentation or on a wiki, or just be in the minds of some (but not all) devs.
 
-To actually make the wrong thing more difficult and the right thing easier, we use tooling. The following 3 are a subset thereof:
-
-- **BannedApiAnalyzers** is a Roslyn analyzer that allows you to ban specific APIs. You can also add a suggestion for which API to use instead. 
-
-**ArchUnitNET** brings architecture fitness tests to .NET, inspired by Java's ArchUnit. You write "normal" xUnit tests but can use a library to verify structural rules about your codebase.
-
-**.editorconfig** enforces code style conventions that both the IDE and the build respect. For those coming from "native" FxCop and Stylecop, this is the successor place for such configuration.
+To actually make the wrong thing more difficult and the right thing easier, we use tooling. Specifically ArchUnitNET, .editorconfig and BannedApiAnalyzer. See one of the last chapters for more details and how to set them up.
 
 ## Examples, In No Particular Order
 
@@ -380,6 +374,62 @@ resharper_convert_to_extension_block_highlighting = none
 ```
 
 We disable the IDE suggestion to convert classic extension methods to extension blocks.
+
+## Tooling
+
+### BannedApiAnalyzers
+
+is a Roslyn analyzer that allows you to ban specific APIs. 
+You can also add a suggestion for which API to use instead.
+
+Use nuget package: Microsoft.CodeAnalysis.BannedApiAnalyzers
+
+And add a BannedSymbols.*.txt file to your solution
+
+The syntax to specify an API is a bit tricky, especially with generic methods / types. 
+I have not yet found any useful documentation (appart from the analyzer source code) which would help finding the right incantation for banishing a certain API.
+
+*BUT*: claude (or any other LLM) does help enormously here.
+
+### ArchUnitNET
+
+brings architecture fitness tests to .NET, inspired by Java's ArchUnit. 
+You write "normal" xUnit tests but can use a library to verify structural rules about your codebase.
+
+use nuget package: TngTech.ArchUnitNET.xUnit
+
+The tests usually consist of 2 parts:
+
+1. the rule(s) you want to verify
+2. the set of types / assemblies / things the rule should be checked for
+
+You can see this split in the examples above. We moved the second part into a dedicated static class to be reused by all the tests.
+
+I was recently recommended [NetArchTest](https://github.com/BenMorris/NetArchTest) as a easier to use version. 
+I do agree that the way ArchUnitNET wants you to specify some rules, arent really intuitive. So NetArchTest might be a alternative, *BUT*: i have not tried it out myself. 
+
+### .editorconfig
+
+enforces code style conventions that both the IDE and the build (mostly) respect. 
+For those coming from "native" FxCop and Stylecop, this is the successor place for such configuration.
+
+## Conclusion
+
+When you finally find the bug at 03:16 on a Saturday morning, which has been silently corrupting production data, you might want to curse C# and its language designers.
+Feel free to do so. It's cathartic, believe me.
+
+But also remember that those same designers have kept a 20+ year old language alive and useful to millions of developers. 
+They are probably allowed to occasionally come up with a default that disagrees with common sense.
+
+So how do you deal with a language that is merely useful rather than perfect? As I see it, you have a few options:
+1. Keep cursing the language designers. Tempting, but not particularly productive.
+2. Jump ship to another language. Interesting, but that language will have its own quirks.
+3. Use tooling like tests, analyzers, compiler rules, to make the right thing the easy thing and the wrong thing the loud thing.
+
+We chose the third one. Compilers never get tired of telling you that you did something wrong. If anything, they seem to enjoy it..
+
+What quirks have bitten you? How do you deal with them? Let me know in the comments.
+
 
 ## Further Reading
 
