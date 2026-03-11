@@ -48,7 +48,7 @@ title: "My Post Title"
 description: "Short description for the blog list card" # SEO purpose, used in BlogListPage cards
 authors:
   - autherkey  # from blog/authors.yml
-date: 2026-01-21 # publish date, visible in blog
+date: 2026-01-21 # publish date: use it, if you want to override the date used in the folder name
 tags: [tag1, tag2]
 image: ./images/cover.png
 ---
