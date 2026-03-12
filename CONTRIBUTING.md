@@ -25,7 +25,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
 
 ## Publishing workflow
 
-1. Announce your blog post idea in the [project (backlog column)](https://github.com/orgs/bbvch/projects/5) with an draft item.
+1. Announce your blog post idea in the [project (backlog column)](https://github.com/orgs/bbvch/projects/5) with an _draft_ item. (These cannot be seen by non-members of the [@bbv-blogger team](https://github.com/orgs/bbvch/teams/bbv-blogger)
 2. Ready to write? Convert the draft item to an issue. Assign it to yourself and set it in progress in project board.
 3. Create a branch (e.g. `blog/my-post-slug`) for your blog post.
 4. Add a dated folder under `blog/` following the pattern `YYYY-MM-DD-your-slug/`. Use the date you created your post. This date is primarily used for sorting blog posts in the directory and will be the default publish date. If the publish date differs from the date used in the folder, override the publish date with `date` in the frontmatter.
