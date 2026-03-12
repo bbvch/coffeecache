@@ -24,7 +24,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
 3. [Add yourself as an author](#author-and-tag-registry) in `blog/authors.json` if not already present.
 4. Join our Slack channel #tech-insights-blog
 
-## Publishing workflow
+### Publishing workflow
 
 1. Idea for a blog post?
    1. Announce your idea in the backlog as a draft item.
