@@ -30,9 +30,9 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    1. Announce your idea in the backlog as a draft item.
 2. Ready to write?
    1. Put your draft item in "ready to write"
-   2. Share your idea with @bbv-blog-admin
-   3. Find together with @bbv-blog-admin a person who would write a blog on bbv.ch
-   4. Arrange a date with @bbv-blog-admin (In Roadmap view)
+   2. Share your idea with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blogger-admin)
+   3. Find together with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blogger-admin) a person who would write a blog on bbv.ch
+   4. Arrange a date with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blogger-admin) (In Roadmap view)
 3. Start with writing
    1. Convert to an issue
    2. Put it "in progress"
@@ -40,14 +40,16 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    4. Create a branch (e.g., `blog/my-post-slug`) for your blog post.
    5. Create a [blog structure](#blog-post-structure).
 4. Ready to review?
-    1. Put it "in review"
-    2. Create a PR and link to issue with #{issue-number}
-    3. Request feedback from somebody
-    4. Update based on feedback where helpful
+   1. Put it "in review"
+   2. Create a PR and link to issue with #{issue-number}
+   3. Request feedback from somebody
+   4. Update based on feedback where helpful
 5. Ready to publish?
-   1. Request from bbv-blog-admin approval in PR
+   1. Request from [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blogger-admin) approval in PR
    2. When approved, you can merge
-6. Congrats, you published your post! [Share it widely and engage with readers in the comments](#cross-posting).
+6. Congrats, you published your post!
+   1. [Share it widely](#cross-posting).
+   2. Engage with readers in the comments.
 
 ### Blog post structure
 
@@ -62,7 +64,7 @@ blog/
 
 - Each blog post should be in its own folder under `blog/` with a name following the pattern `YYYY-MM-DD-your-slug/`. The date can be the publish date committed with @bbv-blog-admin.
 - `index.mdx` is the main content file for your blog post. It should include [frontmatter](#frontmatter-example) at the top with metadata about the post (title, description, authors, date, tags, image).
-- The `images/` folder is for any images you want to include in your post. The image used in the frontmatter will be the cover image for the blog list card and the blog post header. You can reference images in your content using relative paths (e.g., `./images/other-image.png`).
+- The `images/` folder is for any images you want to include in your post. You can reference images in your content using relative paths (e.g., `./images/other-image.png`).
 
 ### Frontmatter example
 
@@ -74,17 +76,24 @@ authors:
   - autherkey  # from blog/authors.yml
 date: 2026-01-21 # publish date: use it, if you want to override the date used in the folder name
 tags: [tag1, tag2]
-image: ./images/cover.png
+image: ./images/cover.png # relative path to the cover image for this post, used in BlogListPage cards and post page header
 ---
 ```
 
 ### Cross-posting
 
-- You can cross-post your content to other platforms, such as LinkedIn, Reddit, Medium, and dev.to. When cross-posting, please link back to the original post on our blog with a canonical URL to drive traffic and engagement.
+- You can cross-post your content to other platforms, such as 
+  - LinkedIn, 
+  - Reddit, 
+  - Medium, 
+  - dev.to
+  - and other platforms.
+  
+  When cross-posting, please link back to the original post on our blog with a canonical URL to drive traffic and engagement.
 - You can cross-post content originally posted on your personal blog here. If you do, please add the following to your blog post (MDX file):
    ```html
    <head>
-   <link rel="canonical" href="https://your-original-blog-post-page.com/docs/my-post-slug" />
+      <link rel="canonical" href="https://your-original-blog-post-page.com/docs/my-post-slug" />
    </head>
    ```
 
@@ -111,6 +120,6 @@ image: ./images/cover.png
 
 - For help with the publishing workflow, CI, or tooling, contact or tag a maintainer in your PR.
 
-## Thanks!
+## Thanks
 
 Thank you for contributing. We look forward to your technical content!
