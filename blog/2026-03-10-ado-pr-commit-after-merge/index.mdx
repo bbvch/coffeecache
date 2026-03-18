@@ -1,6 +1,6 @@
 ---
 title: "Merged PR 42: fix(Azure DevOps): Merge PR without prefix in commit message"
-description: "Azure DevOps has recently added a new feature that allows you to remove the PR Id from the commit message after merging a pull request. "
+description: "Azure DevOps has recently added a new feature that allows you to remove the PR ID from the commit message after merging a pull request."
 authors: [shpendkelmendi]
 tags: [Azure DevOps, Conventional Commits, SemVer, Git, Pull Requests, DevOps]
 image: ./images/conventionalcommits.png
@@ -23,7 +23,7 @@ I like simple git graphs.
 And I want to automate chores like deciding whether a new version is a patch, minor, or major increment.  
 That's why I like to use conventional commits which, enable semantic versioning (SemVer). 
 
-Conventional commit is a lightweight/simple convention for your commit messages. 
+Conventional commit is a simple and lightweight convention for your commit messages.
 Here are some examples of conventional commit types and their impact on versioning:
 
 * feat: login as guest with one-time passcode  
@@ -35,7 +35,7 @@ Any small changes will lead to a new patch version or be ignored (depending on t
 * perf: Import up to 10 projects   
 Performance improvements will create a new patch version or be ignored (depending on the config).
 * ci: include e2e tests in pipeline  
-Changes with your CI/CD  will create a new patch version or be ignored (depending on the config).
+Changes with your CI/CD will create a new patch version or be ignored (depending on the config).
 * refactor!: remove deprecated import endpoint  
 By using an exclamation mark (!) after your type, you say, "Hey, here comes a breaking change".  
 This will create a new major version: 1.0.0 → 2.0.0
@@ -68,7 +68,7 @@ But this is not a reliable way in a team. That's why this solution didn't work f
 ### Workaround: Custom Script 
 
 That's why we searched for alternatives. If you just want the commit history to be created correctly, 
-John Reilly describes an alternative approach in his [blog post](https://johnnyreilly.com/azure-devops-pull-requests-conventional-commits), using the Azure DevOps API, Node.js, and Typescript. 
+John Reilly describes an alternative approach in his [blog post](https://johnnyreilly.com/azure-devops-pull-requests-conventional-commits), using the Azure DevOps API, Node.js, and TypeScript. 
 He wrote a tool that uses the autocomplete feature to override the commit message before merging the PR.  
 So basically, what you have seen in the previous chapter by doing it manually.
 
