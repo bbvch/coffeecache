@@ -26,19 +26,14 @@ That's why I like to use conventional commits which, enable semantic versioning 
 Conventional commit is a simple and lightweight convention for your commit messages.
 Here are some examples of conventional commit types and their impact on versioning:
 
-* feat: login as guest with one-time passcode  
-Used for new features. This creates a new minor version: 1.0.0 → 1.1.0
-* fix: correct device registration validation logic  
-Used for bug fix. This created a new patch version: 1.0.0 → 1.0.1
-* chore: update minor version  
-Any small changes will lead to a new patch version or be ignored (depending on the config).
-* perf: Import up to 10 projects   
-Performance improvements will create a new patch version or be ignored (depending on the config).
-* ci: include e2e tests in pipeline  
-Changes with your CI/CD will create a new patch version or be ignored (depending on the config).
-* refactor!: remove deprecated import endpoint  
-By using an exclamation mark (!) after your type, you say, "Hey, here comes a breaking change".  
-This will create a new major version: 1.0.0 → 2.0.0
+| Type          | Example                                                                | Meaning                           | Version Impact                          |
+|---------------|------------------------------------------------------------------------|-----------------------------------|-----------------------------------------|
+| **feat**      | `feat: login as guest with one-time passcode`                          | New feature                       | **Minor** → `1.0.0 → 1.1.0`             |
+| **fix**       | `fix: correct device registration validation logic`                    | Bug fix                           | **Patch** → `1.0.0 → 1.0.1`             |
+| **chore**     | `chore: update minor version`                                          | Maintenance / small changes       | Patch or ignored (config dependent)     |
+| **perf**      | `perf: import up to 10 projects`                                       | Performance improvement           | Patch or ignored (config dependent)     |
+| **refactor!** | `refactor!: remove deprecated import endpoint`                         | Breaking change indicated with `!`| **Major** → `1.0.0 → 2.0.0`             |
+
 
 > If you need support writing conventional commits, try out [commitizen](https://commitizen-tools.github.io/commitizen/).
 
