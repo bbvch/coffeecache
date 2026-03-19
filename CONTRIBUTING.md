@@ -38,7 +38,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    2. Put it "in progress"
    3. Assign it to yourself
    4. Create a branch (e.g., `blog/my-post-slug`) for your blog post.
-   5. Create a [blog structure](#blog-post-structure).
+   5. Create a [blog post folder structure](#blog-post-folder-structure).
 4. Ready to review?
    1. Put it "in review"
    2. Create a PR and link to issue with #{issue-number}
@@ -51,7 +51,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    1. [Share it widely](#cross-posting).
    2. Engage with readers in the comments.
 
-### Blog post structure
+### Blog post folder structure
 
 ```
 blog/
