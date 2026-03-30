@@ -33,5 +33,18 @@
     "socials": {
       "github": "wtjerry"
     }
+  },
+  "vanescoboehm": {
+    "name": "Vanesco Böhm",
+    "title": "Software Engineer",
+    "description": "Vanesco Böhm is an agile software engineer at bbv Software Services AG. His focus lies on cloud and web technologies, particularly .NET, Azure, and Azure DevOps. He continuously expands his expertise in these areas, as well as in software architecture.",
+    "url": "https://www.linkedin.com/in/vanesco-boehm/",
+    "image": "",
+    "imageURL": "/img/authors/VanescoBoehm.jpg",
+    "page": true,
+    "socials": {
+      "linkedin": "vanesco-boehm",
+      "github": "vanescob"
+    }
   }
 }

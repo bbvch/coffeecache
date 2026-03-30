@@ -1,0 +1,218 @@
+---
+title: "Designing Azure DevOps Projects for Real-World Complexity"
+description: "How you structure your Azure DevOps project shapes everything that follows — from team visibility to sprint planning. This guide walks through three real-world scenarios of increasing complexity, so you can make that foundational decision with confidence."
+authors:
+  - vanescoboehm
+tags: [Azure DevOps, Project Structure, Agile, Area Paths, Iterations, Team Configuration]
+image: ./images/ADO-simple-project-structure.jpg
+date: 2026-03-30
+---
+
+**The most consequential Azure DevOps configuration decision you make is also the easiest to get wrong: how to structure your project.** Microsoft's default guidance is clear — start with one project and scale using Teams, Area Paths, and Iteration Paths. This guide walks through three scenarios of increasing complexity, including a concrete, tested solution for the hardest case: multiple teams sharing work across multiple products. It also covers the narrow set of situations where a second project genuinely makes sense.
+
+---
+
+## Core Building Blocks
+
+Before walking through scenarios, it helps to understand the four mechanisms that control visibility and ownership in Azure DevOps.
+
+**Organizations and Projects** form the outer structure. An organization is your top-level namespace (e.g., `dev.azure.com/your-company`); a project contains all work items, repositories, pipelines, boards, and wikis. For the overwhelming majority of teams, one project per company or product group is the right default. Multiple projects in the same organization are possible but introduce real trade-offs, covered briefly at the end of this article.
+
+**Teams** are configurable views into the project's shared work item pool. When you create a team, Azure DevOps automatically provisions a backlog, Kanban board, sprint view, and dashboard for it. A team does not *own* work items — it *filters* them. This distinction shapes every configuration decision that follows.
+
+**Area Paths** are hierarchical labels that define what a work item belongs to. Teams subscribe to one or more area paths, and only work items with a matching area path appear on that team's backlog and board. The golden rule for Kanban boards: each work item should appear on exactly one team's board. Assigning overlapping area paths to multiple teams causes silent conflicts in the board column state fields (`Board Column`, `Board Column Done`, `Board Lane`).
+
+**Iteration Paths** are hierarchical time periods — sprints, releases, or program increments. They are defined at the project level and shared across all teams. Each team independently selects which iteration nodes are "active" for its own sprint view, so two teams can share a project-level sprint definition while operating independently.
+
+---
+
+## Scenario 1: One Team, One Product
+
+The simplest configuration. One project, one team (the default team Azure DevOps creates automatically), and minimal area path structure.
+
+```
+Project: Fabrikam
+│
+├── Area Paths:   Fabrikam  (root node — no sub-areas needed yet)
+│
+└── Iterations:   Fabrikam\Sprint 1
+                  Fabrikam\Sprint 2
+                  Fabrikam\Sprint 3
+```
+
+The default team subscribes to the root area path and selects sprints as they become active. The backlog shows all work items; the sprint board shows items assigned to the current iteration. No further configuration is needed.
+
+This minimal setup is intentional. Add structure only when a real boundary demands it — premature hierarchy creates administrative overhead without adding value. When the team grows beyond 8–10 people or a second workstream appears, revisit the structure. Until then, keep it flat.
+
+---
+
+## Scenario 2: Multiple Teams, One Product
+
+When a single product grows beyond one team, you create additional Azure DevOps Teams and use Area Paths to reflect ownership. Each delivery team gets its own leaf-node area path. Iterations remain shared across all teams.
+
+```
+Area Path structure:
+Fabrikam                           ← Management team (Include sub-areas: ON)
+├── Fabrikam\Team Alpha            ← Team Alpha (subscribes to this node only)
+├── Fabrikam\Team Beta             ← Team Beta (subscribes to this node only)
+└── Fabrikam\Team Gamma            ← Team Gamma (subscribes to this node only)
+
+Iteration structure (shared by all teams):
+Fabrikam\Sprint 1
+Fabrikam\Sprint 2
+Fabrikam\Sprint 3
+```
+
+Delivery teams subscribe exclusively to their own leaf-node area path. The management or portfolio team subscribes to the root `Fabrikam` with **"Include sub-areas"** enabled, giving it rollup visibility across all delivery teams without claiming ownership of their boards.
+
+During sprint planning, Epics and Features are created at the root area path and then assigned to a delivery team by changing the area path to that team's node. Delivery teams break Features into User Stories and Tasks within their own area path. All teams share the same sprint definitions — each team independently marks which sprints are active in its settings.
+
+The **Delivery Plans** widget rounds out this scenario by providing a cross-team calendar view, showing all teams' work across sprints on a single timeline. This is invaluable for spotting dependencies and aligning delivery milestones without requiring a separate planning tool.
+
+---
+
+## Scenario 3: Multiple Teams, Multiple Products
+
+This scenario introduces a second dimension of complexity: separating product ownership from team responsibility.
+
+This is where standard Azure DevOps guidance becomes less prescriptive. The challenge: multiple teams need to work across multiple products, individual engineers may pick up stories from any product, and some teams — like a shared testing or platform team — span *all* products. A simple area-path-per-team model breaks down here because it conflates team ownership with product ownership.
+
+### Why mixing teams and products in area paths fails
+
+If area paths carry both product and team identity (e.g., `Product A\Team Alpha`), you end up with a combinatorial explosion of nodes. A cross-product testing team needs either its own parallel branch or overlapping subscriptions. Worse, a story that starts with Team Alpha and gets reassigned to Team Beta must move between area paths — losing its product association in the process.
+
+### Tested solution: area paths for products, subiterations for teams
+
+One proven approach separates product ownership from team responsibility:
+
+- **Area Paths represent products.** A work item's area path tells you *which product* it belongs to, not *which team* is working on it.
+- **Subiterations represent team assignment within a sprint.** Each sprint node in the iteration hierarchy contains one child node per team. A work item's iteration path tells you both which sprint it belongs to *and* which team is responsible for it in that sprint.
+
+```
+Area Path structure:
+MyOrg                              ← Portfolio team (Include sub-areas: ON)
+├── MyOrg\Product A
+├── MyOrg\Product B
+└── MyOrg\Product C
+
+Iteration structure:
+MyOrg\Sprint 1
+├── MyOrg\Sprint 1\Team Alpha
+├── MyOrg\Sprint 1\Team Beta
+└── MyOrg\Sprint 1\Testing
+MyOrg\Sprint 2
+├── MyOrg\Sprint 2\Team Alpha
+├── MyOrg\Sprint 2\Team Beta
+└── MyOrg\Sprint 2\Testing
+```
+
+Each Azure DevOps Team is configured as follows:
+
+- **Area path subscription**: all product area paths (so the team's backlog shows work across all products, filterable by area path)
+- **Backlog Iteration**: the project root (`MyOrg`), so all unscheduled work is visible in the product backlog
+- **Selected (active) iterations**: only the team's own subiteration nodes (e.g., `Sprint 1\Team Alpha`, `Sprint 2\Team Alpha`)
+
+The result: a team's sprint board displays only work items whose iteration path falls under their subiteration, regardless of which product area path those items carry. Two dimensions — product and team — are tracked independently without either polluting the other.
+
+### Assigning work items
+
+A User Story for Product A owned by Team Alpha in Sprint 1:
+
+```
+Area Path:      MyOrg\Product A
+Iteration Path: MyOrg\Sprint 1\Team Alpha
+```
+
+A testing task that touches Product B, handled by the Testing team in Sprint 2:
+
+```
+Area Path:      MyOrg\Product B
+Iteration Path: MyOrg\Sprint 2\Testing
+```
+
+The Testing team's sprint board shows all items in `Sprint 2\Testing` across every product area path — precisely the cross-product view they need, with no board column conflicts.
+
+Assignment can be made at the **Story level** (the whole story goes to a team's subiteration) or at the **Task level** (the parent story stays at the sprint root while individual tasks go to different teams' subiterations). The task-level variant supports stories that require contributions from multiple teams within the same sprint.
+
+### Trade-offs
+
+- **Iteration management overhead**
+  The operational cost is subiteration maintenance: for each new sprint, you create one child node per team. With four teams and two-week sprints, that amounts to roughly 100 iteration nodes per year. This is manageable with a consistent naming convention (`Sprint NN — [Team Name]`) and can be automated via the [Azure DevOps REST API](https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/classification-nodes/create-or-update) for teams that want to script sprint setup.
+
+- **Reporting challenges**  
+  Built-in analytics (e.g., velocity, burndown) assume iterations represent time rather than team ownership.
+
+- **Increased configuration effort**  
+  Teams must continuously maintain iteration settings.
+
+- **Onboarding complexity**  
+  The model is less intuitive for new team members unfamiliar with Azure DevOps internals.
+
+This makes the approach best suited for organizations where cross-product collaboration is the norm rather than the exception.
+
+### Alternative
+
+An alternative is to keep the standard model:
+
+- Area Paths represent **teams**
+- Iteration Paths represent **time only**
+
+Cross-product collaboration is handled through:
+- shared Epics and Features
+- Delivery Plans for cross-team visibility
+- queries and dashboards
+- optional tagging or custom fields for product classification
+
+This approach is simpler and aligns more closely with Azure DevOps defaults, but becomes limiting when teams frequently switch between products or when shared teams operate across all products.
+
+---
+
+## When Multiple Projects Make Sense
+
+The single-project model handles almost every scenario. A second project is worth the trade-offs in exactly three cases:
+
+**Different process templates.** Process templates are per-project. If one product runs Scrum and another requires CMMI (common in regulated industries), they cannot share a project.
+
+**Hard security boundaries.** Area path permissions restrict visibility at a granular level, but project membership still grants broad default access. For strict client data separation — GDPR compliance, regulated financial data, defense contracts — project-level isolation provides a stronger boundary. Note that the **"Limit user visibility and collaboration to specific projects"** preview feature, combined with the *Project-Scoped Users* group, can partially address GDPR concerns around guest user exposure within a single organization.
+
+**Public projects.** If one project needs to be publicly accessible (open source work, community feedback), it must be isolated from internal projects.
+
+Cross-project trade-offs to understand before creating a second project: cross-project queries cannot follow link chains, capacity planning does not span projects, and most dashboard widgets do not support cross-project teams (though Delivery Plans does). Every additional project introduces administrative duplication and reduces native observability across the organization.
+
+---
+
+## Anti-Patterns to Avoid
+
+**Overlapping area path subscriptions on Kanban boards.** When two teams subscribe to the same area path with "Include sub-areas" enabled, the `Board Column` and `Board Lane` fields on shared work items reflect whichever team last moved them. Keep area path subscriptions exclusive at the leaf level for any team that uses a Kanban board.
+
+**Not setting dates on iteration paths.** Burndown charts, Delivery Plans, and the `@CurrentIteration` query macro all depend on start and finish dates being set on iteration nodes. Creating sprints without dates silently breaks these features from day one.
+
+**Using tags as primary categorization.** Tags are convenient but ungoverned — there is no approval workflow, no hierarchy, and no way to delete them through the UI. Use area paths for product ownership and custom picklist fields for structured reporting attributes. Reserve tags for lightweight, informal labels like "blocked" or "customer-reported."
+
+**Setting the backlog iteration too narrowly.** If a team's **Backlog Iteration** is set to a specific sprint rather than the root node, unscheduled product backlog items disappear from the team's backlog view. Always set the backlog iteration to the highest relevant ancestor node.
+
+**Creating subiterations but not updating team iteration settings.** When you add a new subiteration, each team must go to *Project Settings → [Team] → Iterations* and mark it as active. This is the most common operational mistake with the subiteration pattern and easy to overlook during sprint kickoff.
+
+---
+
+## Conclusion
+
+Azure DevOps project structure rewards deliberate, incremental setup. Start with the simplest configuration that fits your team, and add structure only when a real boundary demands it.
+
+For the hard case — multiple teams sharing work across multiple products — the combination of product-based area paths and team-based subiterations provides clean separation without sacrificing cross-team visibility. The cost is per-sprint iteration node creation; the benefit is that every work item carries two independent dimensions of context (product and team) without conflating them in a single field.
+
+However, if teams are stable and aligned to specific products, cross-product work is limited, or reporting simplicity is a priority, the standard model with team-based area paths remains the better choice.
+ 
+
+The architectural principle behind all three scenarios is the same: **teams are views, not containers.** A team is a configured lens that filters the project's shared work item pool through area path subscriptions and iteration selections. Understanding this makes every configuration decision a deliberate choice about what each team needs to see — rather than a structural wall between teams.
+
+---
+
+## Further Reading
+
+- [**Plan your Azure DevOps organization structure** — Microsoft's authoritative guide on how to structure organizations, projects, and teams before you write a single work item.](https://learn.microsoft.com/en-us/azure/devops/user-guide/plan-your-azure-devops-org-structure)
+- [**Best practices for Agile product management** — Microsoft's consolidated recommendations for backlogs, teams, and iteration cadence — a good cross-reference for the patterns described in this article.](https://learn.microsoft.com/en-us/azure/devops/boards/best-practices-agile-project-management)
+- [**Define area paths and assign to a team** — Step-by-step guide for configuring the area path hierarchy and subscribing teams to the right nodes.](https://learn.microsoft.com/en-us/azure/devops/organizations/settings/set-area-paths)
+- [**Define iteration paths and configure team iterations** — The practical counterpart for setting up sprint structures and activating them per team.](https://learn.microsoft.com/en-us/azure/devops/organizations/settings/set-iteration-paths-sprints)
+- [**Configure hierarchical teams** — Microsoft's walkthrough for setting up a portfolio or program team that has rollup visibility across multiple delivery teams within the same project.](https://learn.microsoft.com/en-us/azure/devops/boards/plans/configure-hierarchical-teams)
+- [**Should You Use One Project to Rule Them All?** — Martin Hinshelwood (nkdagility) makes the case for the single-project model with practical reasoning on when exceptions are warranted.](https://nkdagility.com/resources/blog/should-you-use-one-project-to-rule-them-all-in-azure-devops/)
