@@ -1,0 +1,302 @@
+---
+title: "Rust vs modern C++ 2/3"
+description: "Rust trifft auf modernes C++: Ein fairer Vergleich einiger Sprachfeatures Teil 2/3"
+authors:
+  - oliverwith
+tags: [rust, c++]
+image: ./images/cppvsrust.png
+---
+
+
+
+# Rust trifft auf modernes C++ Teil: 2 von 3
+
+Nach dem Ternary-Operator, den es gar nicht braucht, und verschiedenen Ansätzen zu Slices geht die Diskussion weiter
+über Optionals und Vergleichsoperatoren.
+
+
+{/* truncate */}
+---
+
+## Optionale Werte: Wenn nichts auch was ist
+
+**Marco:** "Schau mal. Wir haben jetzt auch `std::optional`!"
+
+**Sarah:** "Welcome to the party, pal! Ist im Prinzip das Gleiche wie unser `Option<T>`."
+
+**Marco:** "Siehst du, C++ bleibt relevant!"
+
+### Das Problem: Einen Wert im Array finden
+
+Klassisches Szenario: Wir suchen das erste Element, das eine Bedingung erfüllt, falls es eins gibt.
+
+### C++: std::optional
+
+```cpp
+#include <optional>
+#include <vector>
+#include <iostream>
+
+std::optional<int> find_first_even(const std::vector<int>& numbers) {
+    for (const auto& n : numbers) {
+        if (n % 2 == 0) {
+            return n;
+        }
+    }
+    return std::nullopt;
+}
+
+int main() {
+    std::vector<int> numbers = {1, 3, 7, 8, 9};
+
+    if (auto result = find_first_even(numbers); result.has_value()) {
+        std::cout << "Found: " << result.value() << "\n";
+    } else {
+        std::cout << "No even number found\n";
+    }
+}
+```
+
+**Marco:** "Sauber. Die Absenz ist explizit mit `std::nullopt`. Funktional geht auch:"
+
+```cpp
+#include <algorithm>
+
+std::optional<int> find_first_even_functional(const std::vector<int>& numbers) {
+    auto it = std::ranges::find_if(numbers, [](int n) { return n % 2 == 0; });
+    if (it != numbers.end()) {
+        return *it;
+    }
+    return std::nullopt;
+}
+```
+
+**Marco:** "Aber ich muss aus dem Iterator selbst den Rückgabewert bauen.
+
+### Rust: `Option<T>`
+
+```rust
+fn find_first_even(numbers: &[i32]) -> Option<i32> {
+    for &n in numbers {
+        if n % 2 == 0 {
+            return Some(n);
+        }
+    }
+    None
+}
+
+fn main() {
+    let numbers = vec![1, 3, 7, 8, 9];
+    let result = find_first_even(&numbers);
+
+    match result {
+        Some(n) => println!("Found: {}", n),
+        None => println!("No even number found"),
+    }
+}
+```
+
+**Sarah:** "Gleiche Idee. Funktional geht natürlich auch:"
+
+```rust
+fn find_first_even_functional(numbers: &[i32]) -> Option<i32> {
+    numbers.iter().find(|&&n| n % 2 == 0).copied()
+}
+```
+
+**Sarah:** "Kein if-check nötig denn `find()` gibt direkt `Option` zurück. Das `|&&n|` ist übrigens keine doppelte Referenzierung sondern ein pattern match auf eine doppelte Referenzierung. Danach kann das `n` direkt verwendet werden."
+
+**Sarah:** "Im Prinzip haben wir beide das gleiche Konzept: Einen Typen, um die Absenz eines Wertes zu signalisieren."
+
+**Marco:** "Genau! `std::optional` und `Option<T>` machen im Grunde das Gleiche."
+
+**Sarah:** "Ein kleiner Unterschied ist: Bei uns ist `Option<T>` der der *normale* Weg. In C++ ist es der *moderne* Weg."
+
+```cpp
+// C++: Klassische Wege, um "kein Wert" zu signalisieren
+User* find_user_old(int id);              // nullptr = nicht gefunden
+auto it = vec.find(...);                  // vec.end() = nicht gefunden
+int get_value();                          // -1 = nicht gefunden (Sentinel)
+
+// C++: Moderner Weg (seit C++17)
+std::optional<User> find_user(int id);    // std::nullopt = nicht gefunden
+```
+
+```rust
+// Rust: Der einzige Weg
+fn find_user(id: u32) -> Option<User> { /* ... */ }
+// Keine nullptr, keine Sentinel-Werte, keine "end()" Iteratoren
+```
+
+**Marco:** "Stimmt... wir haben `std::optional` zu einer Sprache hinzugefügt, die schon viele andere Wege hatte. Ihr habt es von Anfang an als *den* Weg designed."
+
+**Sarah:** "Genau. Das macht Code vorhersagbarer. Wenn ich eine Funktion sehe, die `Option<T>` zurückgibt, weiß ich sofort: Der Wert kann fehlen. Keine Überraschungen mit `nullptr` oder magischen `-1` Werten."
+
+### Umgang mit Optionals: Pattern Matching
+
+**Sarah:** "Aber schau dir an, wie unterschiedlich wir mit den Werten umgehen:"
+
+```rust
+// Rust: Pattern Matching extrahiert den Wert direkt
+match find_first_even(&numbers) {
+    Some(n) => println!("Das erste gerade Zahl ist {}", n),
+    None => println!("Keine gefunden"),
+}
+
+// Oder mit if let
+if let Some(n) = find_first_even(&numbers) {
+    println!("Gefunden: {}", n);
+}
+```
+
+**Marco:** "Bei uns muss man das manuell prüfen:"
+
+```cpp
+// C++: Manuelles Auspacken
+if (auto result = find_first_even(numbers); result.has_value()) {
+    std::cout << "Found: " << result.value() << "\n";
+} else {
+    std::cout << "No even number found\n";
+}
+```
+
+**Sarah:** "Pattern Matching und Algebraic Data Types ist etwas vom Nützlichsten das Rust bietet. Für mich sind das Features, die ich ständig verwende und für die es keine Entsprechung in C++ gibt. Dieses beiden Dinge prägen weite Teile der meisten Rust-Code-Bases."
+
+**Marco:** "Pattern Matching ist erst für C++26 oder später geplant. Es gibt Proposals, aber noch nichts finales"
+
+
+### Fazit
+
+Beide Sprachen haben mit `std::optional` (C++17) und `Option<T>` ein Konzept, um die Absenz eines Wertes explizit zu signalisieren. Das ist ein großer Fortschritt gegenüber impliziten Null-Werten oder Sentinel-Werten.
+
+**Pattern Matching:** Rust hat es eingebaut, C++ bekommt es vielleicht in C++26.
+
+**Für neuen Code:** Beide Sprachen empfehlen `optional`/`Option`. C++ hat hier eine einigermassen brauchbare, moderne Lösung gefunden.
+
+
+### Code Samples zu Options
+
+- [Rust Beispiel](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=bde0687f3b46d35ce159f4cbd2898b29)
+- [C++ Beispiel](https://godbolt.org/z/Yej55bEMx)
+
+
+
+## Vergleichsoperatoren: Das Spaceship landet
+
+**Sarah:** "Wenn wir schon Programmiersprachen vergleichen, lass uns mal über Vergleichsoperatoren reden."
+
+**Marco:** "Seit C++20 haben wir den Spaceship-Operator! `<=>` macht alles automatisch."
+
+**Sarah:** "Was wohl automatisch bei C++ bedeutet? Zeig mal."
+
+### C++: Der Spaceship-Operator mit `= default`
+
+```cpp
+#include <compare>
+#include <string>
+
+struct Person {
+    int age;
+    std::string name;
+
+    // Compiler generiert automatisch lexikographische Vergleiche
+    auto operator<=>(const Person&) const = default;
+};
+
+int main() {
+    Person alice{25, "Alice"};
+    Person bob{23, "Bob"};
+
+    if (bob > alice) { /* ... */ }
+}
+```
+
+**Marco:** "Siehst du? Mit `= default` generiert der Compiler alles automatisch!"
+
+### Rust: Derive Macros
+
+```rust
+#[derive(PartialOrd, PartialEq)]
+struct Person {
+    age: u32,
+    name: String,
+}
+
+fn main() {
+    let alice = Person { age: 25, name: "Alice".into() };
+    let bob = Person { age: 23, name: "Bob".into() };
+
+    if bob > alice { /* ... */ }
+}
+```
+
+**Sarah:** "Praktisch das Gleiche. Hier hat C++ wirklich eine praktische und Lösung gefunden."
+
+**Marco:** "Endlich mal ein Lob! Aber wenn der lexikographische Vergleich nicht ausreicht und ich was Spezielles brauche?"
+
+### Wenn man mehr Kontrolle braucht
+
+**C++: Manuelle Implementation**
+```cpp
+struct Person {
+    int age;
+    std::string name;
+
+    std::strong_ordering operator<=>(const Person& other) const {
+        if (auto age_cmp = age <=> other.age; age_cmp != 0) {
+            return age_cmp;
+        }
+        return name <=> other.name;
+    }
+};
+```
+
+**Rust: Trait manuell implementieren**
+```rust
+use std::cmp::Ordering;
+
+impl PartialOrd for Person {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self.age.partial_cmp(&other.age) {
+            Some(Ordering::Equal) => self.name.partial_cmp(&other.name),
+            ord => ord,
+        }
+    }
+}
+
+impl PartialEq for Person {
+    fn eq(&self, other: &Self) -> bool {
+        self.age == other.age && self.name == other.name
+    }
+}
+```
+
+**Marco:** "Okay, bei Custom-Logic sind wir etwa gleichauf."
+
+**Sarah:** "Stimmt. Hier habt ihr wirklich nachgelegt."
+
+**Marco:** "Was ich verschwiegen habe... Wenn ich den `<=>`-Operator manuell implementiere, muss ich auch den `==` operator implementieren, damit `==` und `!=` Vergleiche gemacht werden können.
+
+**Sarah:** "Da sind wir wieder bei C++ kann alles ... nur manchmal ein bisschen kompliziert"
+
+### Fazit
+Mit `= default` hat C++20 hier tatsächlich eine DX-freundliche Lösung gefunden! Der Spaceship-Operator ist eine echte Verbesserung. Rust ist mit `#[derive]` vergleichbar kompakt. Hier hat C++ gezeigt, dass moderne Features durchaus elegant sein können. Hier ist nicht sowas wie ein obskures Lambda-Konstrukt nötig.
+
+**Wichtig:** In beiden Sprachen müssen die zugrundeliegenden Member-Typen (`int`, `String`, etc.) bereits vergleichbar sein.
+
+
+### Code Samples zu Vergleichsoperatoren
+
+- [Odering C++ (manuell)](https://godbolt.org/z/xxT819jha)
+- [Ordering C++ (automatisch)](https://godbolt.org/z/63bz1Wjjj)
+- [Ordering Rust (mit derive macros)](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=81c302d78f81eb623162197acec389fd)
+- [Ordering Rust (manuell)](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=f848ef3b63b6c37180904c808f2ef2eb)
+
+
+
+## Image Credits
+
+- Rust logo © The Rust Foundation, used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Modified and combined with other elements.
+- C++ logo by [Jeremy Kratz](https://isocpp.org/home/terms-of-use). Modified and combined with other elements.
+
+Cover image derived from the above and shared under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
