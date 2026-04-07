@@ -97,11 +97,11 @@ fn add(a: i32, b: i32) -> () {
 }
 ```
 
-Das ist auch der Grund, warum `if`, `match`, `loop` und sogar Blöcke `{}` in Rust Werte zurückgeben können – sie sind alle Expressions. In C++ sind das Statements, weshalb man ein Extrakonstrukt wie den ternary operator braucht.
+Das ist auch der Grund, warum `if`, `match`, `loop` und sogar Blöcke `{}` in Rust Werte zurückgeben können: Sie sind alle Expressions. In C++ sind das Statements, weshalb man ein Extrakonstrukt wie den ternary operator braucht.
 
 ---
 
-## Slices und Ranges – Elegant auf Teilstücke zugreifen
+## Slices und Ranges: Elegant auf Teilstücke zugreifen
 
 **Sarah:** "Lass uns mal über Slices reden. Slices sind extrem praktisch, um einen Ausschnitt aus einer Datenstruktur auszuleihen."
 
@@ -177,8 +177,6 @@ int main() {
 
 **Marco:** "Das geht nicht. Wir haben keine Slice-Syntax. Dafür kann ich zwischen Ranges und Iteratoren wählen!"
 
-### Der Unterschied
-
 **Sarah:** "Der Punkt ist: Slices sind bei Rust von Anfang an eingebaut. Teil der Sprache."
 
 ```rust
@@ -197,7 +195,7 @@ int main() {
 
 ### Lazy Evaluation
 
-**Sarah:** "Wenigstens sind beide lazy – kein Zwischenarray wird erstellt."
+**Sarah:** "Wenigstens sind beide lazy, das heisst kein Zwischenarray wird erstellt."
 
 **Marco:** "Ja! Das war ein großer Fortschritt. Früher mussten wir alles kopieren."
 
@@ -209,7 +207,7 @@ Beide Sprachen haben Konzepte für Teilstücke von Sequenzen:
 - **Rust:** Native Slice-Syntax `&data[2..7]`, Teil der Sprache seit Tag 1
 - **C++:** Ranges seit C++20 (braucht `-std=c++20`), oder klassische Iteratoren
 
-**Der Unterschied:** Rust hat Slices von Grund auf eingebaut mit direkter, intuitiver Syntax. C++ hat Ranges nachgerüstet – funktioniert, aber mit umständlicherer Syntax (`drop`/`take` statt direkter Range-Notation).
+**Der Unterschied:** Rust hat Slices von Grund auf eingebaut mit direkter, intuitiver Syntax. C++ hat Ranges nachgerüstet. Das funktioniert, aber mit umständlicherer Syntax (`drop`/`take` statt direkter Range-Notation).
 
 **Für Legacy-Code:** C++ kann auf Iteratoren zurückfallen, die seit Jahrzehnten existieren.
 
