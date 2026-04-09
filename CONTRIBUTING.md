@@ -30,9 +30,9 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    1. Announce your idea in the backlog as a draft item.
 2. Ready to write?
    1. Put your draft item in "ready to write"
-   2. Share your idea with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blogger-admin)
-   3. Find together with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blogger-admin) a person who would write a blog on bbv.ch
-   4. Arrange a date with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blogger-admin) (In Roadmap view)
+   2. Share your idea with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blog-admin).
+   3. Find together with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blog-admin) a person who would write a blog on bbv.ch
+   4. Arrange a date with [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blog-admin) (In Roadmap view)
 3. Start with writing
    1. Convert to an issue
    2. Put it "in progress"
@@ -45,7 +45,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    3. Request feedback from somebody
    4. Update based on feedback where helpful
 5. Ready to publish?
-   1. Request from [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blogger-admin) approval in PR
+   1. Request from [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blog-admin) approval in PR
    2. When approved, you can merge
 6. Congrats, you published your post!
    1. [Share it widely](#cross-posting).
