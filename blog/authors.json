@@ -46,5 +46,18 @@
       "linkedin": "vanesco-boehm",
       "github": "vanescob"
     }
+  },
+  "oliverwith": {
+    "name": "Oliver With",
+    "title": "Senior Software Engineer",
+    "description": "Oliver With  is a Senior Software Engineer and Embedded Software Specialist at bbv Software Services AG. He is enthusiastic about Rust because it is the first language to combine memory safety, performance, and developer experience.",
+    "url": "https://www.linkedin.com/in/oliver-with/",
+    "imageURL": "/img/authors/OliverWith.jpg",
+    "page": true,
+    "image": "",
+    "socials": {
+      "linkedin": "oliver-with",
+      "github": "quattervals"
+    }
   }
 }

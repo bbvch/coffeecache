@@ -1,0 +1,23 @@
+kubernetes:
+  label: Kubernetes
+  permalink: /kubernetes
+
+architecture:
+  label: Architecture
+  permalink: /architecture
+
+cloud-native:
+  label: Cloud Native
+  permalink: /cloud-native
+
+well-architected:
+  label: Well-Architected
+  permalink: /well-architected
+
+rust:
+  label: Rust
+  permalink: /rust
+
+c++:
+  label: C++
+  permalink: /cpp
