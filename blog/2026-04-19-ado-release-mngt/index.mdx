@@ -70,7 +70,7 @@ The second problem is scope pollution. If Features are already used to represent
 
 ## Custom Work Item Type
 
-Custom Work Item Types exist to model domain entities that have no natural fit among the standard types. The inherited process model allows organizations to define types specific to their workflow: an Impediment WIT for blockers that need their own lifecycle, a Risk WIT for regulated project risk registers, a Change Request WIT for formal change control boards. The common pattern is an entity with its own form, workflow states, and relationships — something that is neither a Story, Bug, Task, Feature, nor Epic.
+Custom Work Item Types (WIT) exist to model domain entities that have no natural fit among the standard types. The inherited process model allows organizations to define types specific to their workflow: an Impediment WIT for blockers that need their own lifecycle, a Risk WIT for regulated project risk registers, a Change Request WIT for formal change control boards. The common pattern is an entity with its own form, workflow states, and relationships — something that is neither a Story, Bug, Task, Feature, nor Epic.
 
 A "Release" work item type follows the same pattern. Define the type with the fields the team actually needs — version number, target date, release owner, deployment checklist, release notes — and a workflow that reflects the release lifecycle:
 
@@ -94,9 +94,9 @@ caption="Stories can be linked as related when using a custom work item type for
 
 The key advantage over using a Feature as the release container is that a Story can be linked to multiple Release work items simultaneously. The Related link type uses a many-to-many topology — there is no parent-child tree constraint. "Role-based permissions" can appear under both Release 2.5 and Release 2.6 without splitting the story. There is also no conflict with existing Features: releases live as a separate type with their own backlog view.
 
-The cost is visibility. Links between a Story and a Release WIT do not surface as a filter option in the sprint board or sprint backlog. Sprint board filters operate on iteration path and area path — not on linked work item types. This is an architectural limitation of the product, not a configuration gap. Seeing release membership in sprint context requires a saved query ("all items in Sprint 22 with a Related link to Release 2.5"), not a toggle in the board UI.
+The cost is visibility. Links between a Story and a Release WIT do not surface as a filter option in the sprint board or sprint backlog. Sprint board filters operate on iteration path and area path — not on linked work item types. This is an architectural limitation of the product, not a configuration gap. Seeing release membership in sprint context requires a dedicated query ("all items in Sprint 22 with a Related link to Release 2.5"), not a board toggle.
 
-Setup requires process customization at the organization level — creating an inherited process, adding the type and its fields, and migrating the project to the new process. These are one-time tasks, but they need a process administrator and affect every project on that process template.
+Setup requires organization-level process customization. If the project already uses an inherited process, the Custom WIT is added directly to it — no project migration needed. If the project is on a base system process (Agile, Scrum, CMMI), a process administrator first creates an inherited variant, adds the type and its fields, then changes the project to use it — a one-time configuration change that leaves all existing work items intact. Either way, the change is scoped to the process template, not the project alone: every other project sharing that template also gains the new type, which makes this an organization-level decision rather than a local one.
 
 **When to reach for it:** The team needs a first-class Release entity with its own lifecycle, metadata, and accountability. Features are already occupied with product meaning. Multi-release assignment is a regular operational need. The team is willing to use saved queries for release-based filtering rather than a live board toggle.
 
@@ -117,8 +117,6 @@ caption="Tags can be tempting to use because of their simplicity and versatility
 />
 
 Tags carry no metadata. A tag is a string — there is no release date, owner, description, or status attached to it. Reporting is also constrained: query-based charts cannot group results by tag; only the "Chart for Work Items" dashboard widget supports tag grouping, and Analytics queries require additional workarounds to use tags cleanly. Sprint burndown and velocity charts have no awareness of tags at all.
-
-There are also practical limits worth knowing: a single work item can carry at most 100 tags, only the first 200 tags in the project appear in autocomplete, and performance degrades in collections with more than 100,000 tags.
 
 **When to reach for it:** The team is small enough that naming discipline can substitute for governance, multi-release assignment is needed, zero configuration overhead is the priority, and the long-term maintenance risk is consciously accepted. Tags are also a reasonable fallback when multi-release assignment is needed but a Marketplace extension cannot be approved.
 
@@ -144,9 +142,7 @@ width={650}
 caption="Custom fields with release information can be directly visible on story cards in the sprint Taskboard."
 />
 
-The field can be used as a filter criterion in Delivery Plans via its field criteria settings, and works natively with Analytics, Power BI, and query-based charts. Grouping by a clean categorical field requires no text-splitting workarounds. The standard backlog filter toolbar does not expose custom fields — filtering by the field in backlog context requires a saved query.
-
-One important limitation: the field is not available as a filter in the sprint board or sprint backlog view. Sprint board filters operate on iteration path and area path — custom fields are not exposed there. This is a product constraint, not a misconfiguration. Seeing release membership during sprint execution requires a saved query rather than a UI toggle, which is a genuine daily-use gap that teams should factor in before choosing this option.
+The field can be used as a filter criterion in Delivery Plans via its field criteria settings, and works natively with Analytics, Power BI, and query-based charts. Grouping by a clean categorical field requires no text-splitting workarounds. Neither the standard backlog filter toolbar nor the sprint board exposes custom fields: seeing release membership during sprint execution requires a saved query rather than a UI toggle, which is a genuine daily-use gap that teams should factor in before choosing this option.
 
 The other constraint is cardinality. A story holds one release value at a time. When a story spans two releases, teams typically split it, update the value when scope shifts, or accept a temporary inaccuracy. For most teams this is a minor operational trade-off; for teams where multi-release assignment is frequent, it becomes a recurring friction point.
 
@@ -206,7 +202,7 @@ The problem is that this structure conflates two independent questions — *when
 
 There is also no release metadata: iteration nodes have a name and dates, and nothing else.
 
-Microsoft's documentation consistently recommends treating iteration paths as time periods and using other mechanisms — features, area paths, or custom fields — for release scope categorization. The iteration path hierarchy pattern described in the [previous article on Azure DevOps project structure](/blog) shows a legitimate use of nested iteration nodes; encoding release versions there is not it.
+Microsoft's documentation consistently recommends treating iteration paths as time periods and using other mechanisms — features, area paths, or custom fields — for release scope categorization. The iteration path hierarchy pattern as described in my article on Azure DevOps project structure shows a legitimate use of nested iteration nodes; encoding release versions there is not it.
 
 **When to reach for it:** Essentially never as a primary release categorization strategy. The rollup view is convenient, but the conceptual debt accumulates quickly as soon as velocity, burndown, or capacity data is needed.
 
@@ -232,40 +228,33 @@ All options compared across the dimensions that matter for release management. D
 |---|---|---|---|---|---|---|
 | **Original purpose** | Group stories into shippable capabilities | Domain entities with their own lifecycle | Ad-hoc, informal labels | Governed single-value metadata | Governed multi-value metadata | Sprint / time scheduling |
 | **Multi-release assignment** | One parent only (-) | Via Related links (+) | Many tags per item (+) | Single value (-) | Multiple values (+) | Single iteration (-) |
-| **Governed values** | Name only (+/-) | Custom fields (+) | Free-form (-) | Enumerated picklist (+) | Enumerated via extension (+) | Defined by admin (+) |
-| **Backlog / Delivery Plans filter** | Via parent hierarchy (+) | Requires saved query (-) | Native (+) | Delivery Plans only (+/-) | Delivery Plans only, "Contains" (+/-) | Native (+) |
-| **Sprint board visibility** | "Show parents" only (+/-) | Not available (-) | Flattens hierarchy (+/-) | Not available (-) | Not available (-) | Native (+) |
+| **Governed values** | Name only (+/-) | Name only (+/-) | Free-form (-) | Enumerated picklist (+) | Enumerated via extension (+) | Defined by admin (+) |
+| **Backlog / Delivery Plans filter** | Via parent hierarchy (+) | Requires saved query (-) | Native (+) | Delivery Plans only; saved query for backlog (-) | Delivery Plans only, "Contains"; saved query for backlog (-) | Native (+) |
+| **Sprint board visibility** | "Show parents" only (+/-) | Not available (-) | Native filter; hides parent grouping (+) | Not available (-) | Not available (-) | Native (+) |
 | **Release has own metadata** | Dates, owner, description (+) | Full custom form (+) | String only (-) | String only (-) | String only (-) | Dates & name only (+/-) |
-| **Release has own workflow** | Inherits WIT states (+/-) | Custom states (+) | (-) | (-) | (-) | (-) |
-| **Analytics / Power BI** | Hierarchy rollup (+) | Via linked-item queries (+/-) | No chart grouping (+/-) | Clean categorical field (+) | Needs text-split logic (+/-) | Works, conflates time & scope (+) |
-| **Setup complexity** | None | Medium | None | Low | Low & extension install | None |
-| **Extension required** | No | No | No | No | Yes (+/-) | No |
-| **Conflicts with standard usage** | If Features already in use (+/-) | No conflict (+) | No conflict (+) | No conflict (+) | No conflict (+) | Conflates time & scope (+/-) |
+| **Release has own workflow** | Inherits WIT states (+) | Custom states (+) | No (-) | No (-) | No (-) | No (-) |
+| **Analytics / Power BI** | Hierarchy rollup (+) | Via linked-item queries (+/-) | Dashboard widget only; burndown/velocity unaware (-) | Clean categorical field (+) | Needs text-split logic (+/-) | Works, conflates time & scope (+/-) |
+| **Setup complexity** | None (+) | Medium; affects all projects on process template (-) | None (+) | Low; admin needed to add/change values (+/-) | Low; requires extension; admin needed to add/change values (-) | None (+) |
+| **Extension required** | No (+) | No (+) | No (+) | No (+) | Yes - degrades to plain text if abandoned (-) | No (+) |
+| **Conflicts with standard usage** | If Features are already in use (+/-) | No conflict (+) | No conflict (+) | No conflict (+) | No conflict (+) | Conflates time & scope (+/-) |
 
 ---
 
 ## Decision Guide
 
-**The team needs a quick release label, is small, and can enforce a naming convention by discipline.**
-→ Tags. Zero configuration, multi-release assignment. Accept the governance risk consciously.
+Use **tags** if the team needs a quick release label, is small, and can enforce a naming convention by discipline. Zero configuration, multi-release assignment. Accept the governance risk consciously.
 
-**Single-value release assignment covers most cases; reporting and analytics on release scope matter.**
-→ Custom picklist field. Clean categorical data, governed enumeration, works natively with Analytics and Power BI. Use saved queries to surface release membership in sprint context.
+Choose a **custom picklist field** if single-value release assignment covers most cases and release scope reporting matters. Clean categorical data, governed enumeration, works natively with Analytics and Power BI. Use saved queries to surface release membership in sprint context.
 
-**Stories genuinely span two releases and governance matters.**
-→ Multi-value picklist extension if a Marketplace extension can be approved. If not, Tags with a strict naming convention as a conscious fallback.
+Use a **multi-value picklist extension** if stories genuinely span two releases, governance matters and a Marketplace extension can be approved. If not, use tags with a strict naming convention as a conscious fallback.
 
-**The team needs a Release entity with its own lifecycle — target date, owner, release notes, workflow states.**
-→ Custom WIT. Accept that release membership is surfaced via queries rather than inline board filters.
+Choose **Custom WIT** when the team needs a Release entity with its own lifecycle — target date, owner, release notes, workflow states. Accept that release membership is surfaced via queries rather than inline board filters.
 
-**Features are already used for product capabilities and cannot be repurposed.**
-→ Custom WIT or custom picklist field, depending on whether release metadata and multi-release assignment are required.
+**Custom WIT and custom picklist fields** are alternatives when Features are already used for product capabilities and cannot be repurposed. The choice between them depends on whether release metadata and multi-release assignment are required.
 
-**Features are free to use and the team wants cross-team release planning in Delivery Plans.**
-→ Feature/Epic as container. Pairs naturally with Delivery Plans for timeline visualization with no additional configuration.
+Use **Features/Epics** as release containers when they are free to use and when the team wants cross-team release planning in Delivery Plans. This pairs naturally with Delivery Plans for timeline visualization with no additional configuration.
 
-**Audit-quality traceability is required — what shipped in each build, deployed when, to which environment.**
-→ Pipeline-driven links, layered on top of whichever planning option is in use.
+When audit-quality traceability is required, add **pipeline-driven links** on top of whichever planning option is in use to track what shipped in each build, when it deployed, and to which environment.
 
 ---
 
@@ -303,13 +292,11 @@ The mechanisms described here are not mutually exclusive. The most complete setu
 
 ## Further Reading
 
-- [**Define features and epics to organize backlog items** — Microsoft Learn](https://learn.microsoft.com/en-us/azure/devops/boards/backlogs/define-features-epics?view=azure-devops)
 - [**Add a custom work item type** — Microsoft Learn](https://learn.microsoft.com/en-us/azure/devops/organizations/settings/work/add-custom-wit?view=azure-devops)
 - [**Add and manage fields for an inherited process** — Microsoft Learn](https://learn.microsoft.com/en-us/azure/devops/organizations/settings/work/customize-process-field?view=azure-devops)
 - [**Tagging Work Items** — James Snape (April 2024). Practitioner post on how tags work in Azure DevOps and where they stop being useful — a good complement to the governance discussion in this article.](https://snape.me/2024/04/tagging-workitems/)
 - [**Link type reference** — All supported link topologies and their cardinality constraints.](https://learn.microsoft.com/en-us/azure/devops/boards/queries/link-type-reference?view=azure-devops)
 - [**Configure pipelines to support work tracking** — Microsoft Learn](https://learn.microsoft.com/en-us/azure/devops/pipelines/integrations/configure-pipelines-work-tracking?view=azure-devops)
 - [**Building a roadmap and tracking dependencies across teams with Delivery Plans** — Azure DevOps Hands-on Labs. A practical lab that walks through configuring Delivery Plans for cross-team release scope visualization and dependency tracking.](https://www.azuredevopslabs.com/labs/azuredevops/deliveryplans/)
-- [**Work-items tracking using Release Management** — Azure DevOps Blog post covering pipeline-driven traceability in depth.](https://devblogs.microsoft.com/devops/work-items-tracking-using-release-management/)
 - [**Multivalue Control extension** — Microsoft DevLabs (open-source)](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.vsts-extensions-multivalue-control)
 - [**Work tracking, process, and project limits** — Authoritative reference for tag limits, picklist limits, and WIT constraints.](https://learn.microsoft.com/en-us/azure/devops/organizations/settings/work/object-limits?view=azure-devops) 
