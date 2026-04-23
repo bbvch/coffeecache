@@ -50,7 +50,7 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    2. When the publishing date is clear, change the blog path and the frontmatter accordingly
    3. The merge is done by the [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blog-admin) except you are notified otherwise.
 6. Congrats, you published your post!
-   1. A few minutes are the merge, your post will be online.
+   1. A few minutes after the merge, your post will be online.
    2. [Share it widely](#cross-posting).
    3. Engage with readers in the comments.
 
