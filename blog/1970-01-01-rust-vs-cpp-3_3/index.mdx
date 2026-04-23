@@ -1,0 +1,430 @@
+---
+title: "Rust vs modern C++ 3/3"
+description: "Rust trifft auf modernes C++: Ein fairer Vergleich einiger Sprachfeatures Teil 3 von 3"
+authors:
+  - oliverwith
+date: 2026-05-10
+tags: [rust, c++]
+image: ./images/cppvsrust.png
+---
+
+
+# Rust trifft auf modernes C++
+
+Sarah und Marco treffen sich auf einem Workshop wieder. In der Pause kommt das Gespräch auf Enums.
+
+{/* truncate */}
+---
+
+## Enums und Pattern Matching
+
+
+**Marco:** "Wir haben auch Enums! Seit C++11 sogar typsichere `enum class` und nicht mehr einfach die verkleideten integers von C."
+
+**Sarah:** "Stimmt, die einfachen Enums sind bei uns ziemlich ähnlich."
+
+### Einfache Enums: Fast identisch
+
+**C++: enum class**
+
+```cpp
+enum class RobotCommand {
+    Stop, Move, Grip, Release, Calibrate
+};
+
+void execute(RobotCommand cmd) {
+    switch (cmd) {
+        case RobotCommand::Stop:
+            // act on command
+            break;
+        case RobotCommand::Move:
+            // act on command
+            break;
+        case RobotCommand::Grip:
+            // act on command
+            break;
+        // ~snip~
+        default: {
+            // default action
+        }
+    }
+}
+
+void simpleSwitch() {
+    const auto roboCmd = RobotCommand::Grip;
+    execute(roboCmd);
+}
+```
+
+**Rust: Simple Enums**
+
+```rust
+fn simple_switch() {
+    enum RobotCommand {
+        Stop,
+        Move,
+        Grip,
+        Release,
+    }
+
+    fn execute(cmd: RobotCommand) {
+        match cmd {
+            RobotCommand::Stop => { /*act on command*/ }
+            RobotCommand::Move => { /*act on command*/ }
+            // ~snip~
+            _ => { /*default action*/ }
+        }
+    }
+
+    let robot_command = RobotCommand::Move;
+    execute(robot_command);
+}
+```
+
+**Marco:** "Siehst du? Quasi das Gleiche!"
+
+**Sarah:** "Für einfache Enums, ja. Aber was, wenn die Kommandos Daten mitbringen?"
+
+**Marco:** "Ähm... was!? Daten?! Zeig mal ein Beispiel."
+
+**Sarah:** "Nehmen wir an, `MoveTo` braucht Koordinaten und `Grip` eine Kraft-Angabe."
+
+### Rust: Algebraische Datentypen
+
+```rust
+fn match_complex_enums() {
+    enum RobotCommand {
+        Stop,
+        MoveTo { x: f64, y: f64, z: f64 },
+        Grip { force: f64 },
+        Release,
+    }
+
+    fn execute(cmd: RobotCommand) {
+        match cmd {
+            RobotCommand::Stop => println!("Emergency stop"),
+            RobotCommand::MoveTo { x, y, z } => {
+                println!("Moving to ({}, {}, {})", x, y, z)
+            }
+            RobotCommand::Grip { force } => {
+                if force > 100.0 {
+                    println!("Warning: High force {}", force);
+                } else {
+                    println!("Gripping with force {}", force);
+                }
+            }
+            RobotCommand::Release => println!("Releasing"),
+        }
+    }
+
+    let robot_command = RobotCommand::MoveTo {
+        x: 4.3,
+        y: 67.0,
+        z: 2.6,
+    };
+    execute(robot_command);
+}
+```
+
+**Sarah:** "Salopp gesagt, leben die Daten *im* Enum. Pattern Matching packt sie direkt aus."
+
+### Info: Algebraische Datentypen
+
+Rusts Enums sind eigentlich *algebraische Datentypen* oder *Sum Types* aus der funktionalen Programmierung. Jede Variante kann unterschiedliche Daten enthalten, und der Compiler garantiert, dass immer nur eine Variante aktiv ist. Das macht sie mächtiger als klassische Enums denn sie können Zustand und Struktur kombinieren.
+
+### C++: std::variant und std::visit
+
+**Marco:** "Bei uns geht das mit `std::variant`... Moment, lass mich das aufschreiben."
+
+```cpp
+struct Stop {};
+struct MoveTo {
+    double x, y, z;
+};
+struct Grip {
+    double force;
+};
+struct Release {};
+struct Calibrate {};
+
+using RobotCommand = std::variant<Stop, MoveTo, Grip, Release, Calibrate>;
+
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+
+void execute(const RobotCommand &cmd) {
+    std::visit(
+        overloaded{
+            [](const Stop &) {
+                std::cout << "Emergency stop\n";
+            },
+            [](const MoveTo &m) {
+                std::cout << "Moving to (" << m.x << ", " << m.y
+                            << ", " << m.z << ")\n";
+            },
+            [](const Grip &g) {
+                if (g.force > 100.0)
+                    std::cout << "Warning: High force " << g.force << "\n";
+                else
+                    std::cout << "Gripping with force " << g.force << "\n";
+            },
+            [](const Release &) { std::cout << "Releasing\n"; },
+            [](const Calibrate &) { std::cout << "Calibrating\n"; }
+        },
+        cmd);
+}
+
+
+void complexSwitch() {
+    const auto roboCmd = MoveTo{1.0, 2.0, 3.0};
+    execute(roboCmd);
+}
+```
+
+**Sarah:** "Was ist das denn? Soviel Zeremonie für ein so einfach anzuwendendes Konzept"
+
+**Marco:** "Okay... ich brauche:
+1. Separate Structs für jede Variante
+2. `std::variant` um sie zusammenzufassen
+3. Ein `overloaded` Template-Helper
+4. `std::visit` mit Lambdas für jeden Fall"
+
+**Sarah:** "Ein Template-Helper nur um Pattern Matching nachzubauen?"
+
+**Marco:** "Ja... das `overloaded` Pattern muss man entweder selbst schreiben oder aus einer Bibliothek holen. Dies ist sogar die [offizielle Monstrosität](https://en.cppreference.com/w/cpp/utility/variant/visit). C++ kann alles, aber... das ist schon ziemlich umständlich."
+
+**Sarah:**: "Hast du das in der Praxis schon oft gemacht?"
+
+**Marco:** "Ja... aber selten. Meistens behelfe ich mir mit etwas anderem. Du?"
+
+**Sarah:**: "Ständig!, Gerade auch um Nachrichten zwischen Tasks oder Threads auszutauschen schicke ich einfach einen Member dieses Typs"
+
+### Der Unterschied
+
+**Sarah:** "Bei Rust sind Enums mit Daten *die* Standardlösung. Sobald man sich dran gewöhnt hat, verwende ich Enums überall bei Datenstrukturen, die eine Variant-Semantik haben."
+
+```rust
+enum Message {
+    Text(String),
+    Image { data: Vec<u8>, format: String },
+    Video { url: String, duration: u32 },
+}
+```
+
+**Sarah:** "Und auch die Standardlösungen für Optionale Werte und Fehlerbehandlung machen sich algebraische Datentypen zu Nutzen"
+
+```rust
+// Optionale Werte
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+// Fehlerbehandlung
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+
+**Marco:** "Bei uns ist `std::variant` eher... spezialisiert. Für alltägliche Sachen nutzen wir's kaum."
+
+**Sarah:** "Weil die Syntax zu komplex ist?"
+
+**Marco:** "Unter anderem. Und Pattern Matching kommt vielleicht erst in C++26."
+
+### Fazit
+
+Einfache Enums sind in beiden Sprachen ähnlich. Der Unterschied zeigt sich bei **Enums mit Daten**:
+
+**Rust:**
+- Algebraische Datentypen eingebaut
+- Pattern Matching extrahiert Daten direkt
+- Standardlösung für viele Probleme (`Option<T>`, `Result<T,E>`)
+
+**C++:**
+- `std::variant` + `std::visit` seit C++17
+- Braucht Boilerplate (`overloaded` Helper)
+- Komplexe Syntax
+- Echtes Pattern Matching kommt vielleicht mit C++26
+
+**Der Punkt:** Rust hat algebraische Datentypen von Anfang an als Kernfeature designt. C++ hat mit `std::variant` eine technische Lösung nachgerüstet, aber die Ergonomie fehlt. C++ kann alles... nur manchmal mit erstaunlich viel Template-Magie.
+
+### Code Samples zu Enums
+
+- [C++ Simple Enums](https://godbolt.org/z/EhTThbj4T)
+- [C++ Enums mit Daten](https://godbolt.org/z/qMe6W5TdY)
+- [Rust Simple Enums](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=cb92077003042c5386536465f718401d)
+- [Rust Enums mit Daten](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=7c3c53c37d9ec1d15d3dfba7f582f78a)
+
+
+## Konvertierungen: Wenn Typen sich verwandeln
+
+*Sarah und Marco sitzen wieder zusammen, diesmal mit Kaffee und einem Whiteboard voller Koordinatensysteme.*
+
+**Marco:** "Okay, ich gebe zu: Deine Enums mit Daten sind schon praktisch. Aber wie handhabt ihr eigentlich Typumwandlungen in Rust? Bei uns gibt es dafür Konvertierungskonstruktoren."
+
+**Sarah:** "In Rust implementieren wir dazu Traits wie `From` und `TryFrom`. Schau mal, ich habe hier zwei Typen: `Cartesian` und `Polar`. Die wollen wir ineinander umwandeln."
+
+
+### Einfache Konvertierung: Rust mit `From` vs. C++ mit Konstruktoren
+
+**Sarah:** "In Rust implementieren wir `From`, um eine sichere Umwandlung zu definieren. Das ist ähnlich wie ein Konvertierungskonstruktor in C++, aber ohne die Gefahr von impliziten Umwandlungen."
+
+```rust
+struct Cartesian {
+    x: f64,
+    y: f64,
+}
+
+impl Cartesian {
+    fn new(x: f64, y: f64) -> Self {
+        Self { x, y }
+    }
+}
+
+struct Polar {
+    r: f64,
+    theta: f64,
+}
+
+impl Polar {
+    fn new(r: f64, theta: f64) -> Self {
+        Self { r, theta }
+    }
+}
+
+// Umwandlung von Polar nach Cartesian
+// Eine Implementation des 'From'-Traits
+impl From<Polar> for Cartesian {
+    fn from(p: Polar) -> Self {
+        Cartesian {
+            x: p.r * p.theta.cos(),
+            y: p.r * p.theta.sin(),
+        }
+    }
+}
+```
+
+**Marco:** "Bei uns sähe das so aus: Ein Konvertierungskonstruktor in der `Cartesian`-Struktur."
+
+```cpp
+struct Polar;
+struct Cartesian {
+    double x, y;
+    Cartesian(double x, double y) : x(x), y(y) {}
+    Cartesian(const Polar &p); // Konvertierungskonstruktor
+};
+
+struct Polar {
+    double r, theta;
+    Polar(double r, double theta) : r(r), theta(theta) {}
+};
+
+// Implementierung des Konvertierungskonstruktors
+Cartesian::Cartesian(const Polar &p)
+    : x(p.r * std::cos(p.theta)), y(p.r * std::sin(p.theta)) {}
+```
+
+**Sarah:** "Interessant, dass ihr dafür Konstruktoren nutzt. Rust hat übrigens gar keine klassischen Konstruktoren. Das wäre vielleicht ein eigenes Thema wert!"
+
+**Marco:** "*Notiert sich das* Ja, das wäre tatsächlich spannend. Aber zurück zu den Konvertierungen: Was ist, wenn die Umwandlung schiefgehen kann?"
+
+
+### Fallible Konvertierung: Rust mit `TryFrom` vs. C++ mit Exceptions und `std::expected`
+
+**Sarah:** "Dafür gibt es in Rust `TryFrom`. Nehmen wir an, wir wollen `Cartesian` in `Polar` umwandeln. Beim Ursprung (0, 0) ist der Winkel aber nicht definiert, also ein Fehlerfall in meiner Anwendung."
+
+```rust
+impl TryFrom<Cartesian> for Polar {
+    type Error = String;
+
+    fn try_from(c: Cartesian) -> Result<Self, Self::Error> {
+        let r = (c.x * c.x + c.y * c.y).sqrt();
+        if r == 0.0 {
+            Err("Cannot convert origin (0, 0) to polar coordinates: angle is undefined".to_string())
+        } else {
+            let theta = c.y.atan2(c.x);
+            Ok(Polar { r, theta })
+        }
+    }
+}
+
+// Verwendung
+fn conversions() {
+    let cart = Cartesian::new(3.0, 4.0);
+    match cart.try_into() {
+        Ok(polar) => println!("Polar coordinates: r={}, θ={}", polar.r, polar.theta),
+        Err(e) => println!("Error: {}", e),
+    }
+}
+```
+
+**Marco:** "Bei uns würden wir dafür entweder Exceptions nutzen oder – seit C++23 – `std::expected`. Schau mal:"
+
+```cpp
+#include <expected>
+#include <cmath>
+#include <iostream>
+
+std::expected<Polar, const char*> to_polar(const Cartesian &c) {
+    double r = std::sqrt(c.x * c.x + c.y * c.y);
+    if (r == 0.0) {
+        return std::unexpected("Cannot convert origin (0, 0) to polar coordinates: angle is undefined");
+    } else {
+        return Polar{r, std::atan2(c.y, c.x)};
+    }
+}
+
+// Verwendung
+void conversions() {
+    Cartesian cart{3.0, 4.0};
+    auto result = to_polar(cart);
+    if (result) {
+        std::cout << "Polar coordinates: r=" << result->r << ", θ=" << result->theta << std::endl;
+    } else {
+        std::cerr << "Error: " << result.error() << std::endl;
+    }
+}
+```
+
+**Sarah:** "Ah, `std::expected` ist also die C++ Antwort auf `Result`! Aber Exceptions sind bei euch immer noch weit verbreitet, oder?"
+
+**Marco:** "Ja, leider. Aber `std::expected` wird hoffentlich immer beliebter. Wie schon erwähnt: In C++26 wird es vielleicht sogar ein richtiges Pattern Matching geben ..."
+
+**Sarah** "... das aber vermutlich eine haarsträubende Syntax haben wird.
+
+
+
+### Fazit: Zwei Wege zum gleichen Ziel
+
+| **Aspekt**                  | **Rust**                   | **C++**                                      |
+| --------------------------- | -------------------------- | -------------------------------------------- |
+| **Einfache Konvertierung**  | `From`-Trait               | Konvertierungskonstruktor                    |
+| **Fallible Konvertierung**  | `TryFrom` mit `Result`     | Exceptions oder `std::expected` (seit C++23) |
+| **Implizite Konvertierung** | Nicht möglich, `.into()` nötig | Standardverhalten, opt-out via `explicit` |
+
+**Marco:** "Im Kern lösen wir dasselbe Problem: Wir beschreiben, wie ein Typ in einen anderen überführt wird. Bei C++ sitzt diese Logik direkt im Konstruktor der Zielklasse."
+
+**Sarah:** "In Rust gibt es gar keine Konstruktoren, also brauchen wir einen anderen Ort dafür. Das ist die Rolle von `From` und `TryFrom`: benannte, auffindbare Konvertierungslogik statt versteckter Konstruktormagie."
+
+**Marco:** "Was mich an Rust überrascht: Implizite Konvertierungen sind komplett ausgeschlossen. In C++ muss man dafür aktiv `explicit` hinschreiben, und vergisst es dann doch manchmal."
+
+**Sarah:** "Und in Rust ruft man `.into()` auf, explizit genug, um den Leser zu warnen: *Hier passiert eine Umwandlung.* Die Sicherheit ist dabei eher ein Nebeneffekt des Designs als das eigentliche Ziel."
+
+### Code Samples zu Konversionen
+
+- [Rust Einfache Konversionen](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=b1ac35f30cff66fae7b0aa72503bfc02)
+- [Rust Fallible Konversionen](https://play.rust-lang.org/?version=stable&mode=debug&edition=2024&gist=d6063440b9592164b43cd2281c50f9d1)
+- [C++ Einfache Konversionen](https://godbolt.org/z/GKzzbqcWf)
+- [C++ Fallible Konversionen](https://godbolt.org/z/cvzqEe4an)
+
+
+## Image Credits
+
+- Rust logo © The Rust Foundation, used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Modified and combined with other elements.
+- C++ logo by [Jeremy Kratz](https://isocpp.org/home/terms-of-use). Modified and combined with other elements.
+
+Cover image derived from the above and shared under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
