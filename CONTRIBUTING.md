@@ -41,15 +41,18 @@ Thank you for contributing! This blog is a simple, engineer-driven space for tec
    5. Create a [blog post folder structure](#blog-post-folder-structure).
 4. Ready to review?
    1. Put it "in review"
-   2. Create a PR and link to issue with #{issue-number}
+   2. Create a Pull Request and link to issue with #{issue-number}
    3. Request feedback from somebody
    4. Update based on feedback where helpful
+   5. Request from [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blog-admin) approval in Pull Request
 5. Ready to publish?
-   1. Request from [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blog-admin) approval in PR
-   2. When approved, you can merge
+   1. When approved, wait for the blog administrator to set a publishing date.
+   2. When the publishing date is set, change the blog path and the frontmatter accordingly.
+   3. The merge is done by the [@bbv-blogger-admin team](https://github.com/orgs/bbvch/teams/bbv-blog-admin) except you are notified otherwise.
 6. Congrats, you published your post!
-   1. [Share it widely](#cross-posting).
-   2. Engage with readers in the comments.
+   1. A few minutes after the merge, your post will be online.
+   2. [Share it widely](#cross-posting).
+   3. Engage with readers in the comments.
 
 ### Blog post folder structure
 
