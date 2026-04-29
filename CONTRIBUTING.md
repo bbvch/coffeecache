@@ -85,10 +85,10 @@ image: ./images/cover.png # relative path to the cover image for this post, used
 
 ### Cross-posting
 
-- You can cross-post your content to other platforms, such as 
-  - LinkedIn, 
-  - Reddit, 
-  - Medium, 
+- You can cross-post your content to other platforms, such as
+  - LinkedIn,
+  - Reddit,
+  - Medium,
   - dev.to
   - and other platforms.
   
@@ -112,7 +112,7 @@ image: ./images/cover.png # relative path to the cover image for this post, used
 ## Style & content guidance
 
 - Don't clickbait titles; be clear and descriptive.
-- Be technical and factual — avoid marketing language.
+- Be technical and factual – avoid marketing language.
 - Keep posts focused and reproducible: include commands, snippets, and expected outcomes.
 - Prefer readable code samples and link to full sample repos on GitHub when appropriate.
 - Cite sources and provide links for further reading.
