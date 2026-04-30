@@ -1,0 +1,687 @@
+---
+title: "Unit-Testing vs. Integration-Testing"
+description: "Was ist eigentlich eine Unit? Und wie können wir zwischen Unit- und Integration-Testing das Beste herausholen?"
+authors:
+  - sebastianhans
+date: 2026-05-11
+tags: [testing]
+image: ./images/unit-testing-vs-integration-testing.png
+---
+import CenteredImage from '@site/src/components/Image';
+import PaymentTestsSvg from './images/payment-tests.svg';
+import TestScopesSeparateSvg from './images/test-scopes-separate.svg';
+import TestScopesOverlappingSvg from './images/test-scopes-overlapping.svg';
+
+# Unit-Testing vs. Integration-Testing
+
+Unit-Tests und Integrationstests werden oft miteinander verglichen – und dabei meist als Gegensätze 
+gegenübergestellt. In diesem Artikel werde ich diese beiden Testarten unter einem anderen 
+Blickwinkel betrachten und zeigen, wie diese Sichtweise uns helfen kann, bessere Tests zu schreiben.
+
+{/* truncate */}
+
+## Plädoyer für eine differenzierte Betrachtung
+
+Unit-Tests werden meist als „klein“, „schnell“ und „zuverlässig“ charakterisiert, während 
+Integrationstests in der Regel als „groß“, „langsam“ und „unzuverlässig“ angesehen werden. 
+Vergleicht man einen Test für eine Methode einer Klasse, die nicht viel tut, mit einem Test des 
+kompletten Systems inklusive externer Datenbank, so stimmt das auch. Bei ersterem wären sich 
+wahrscheinlich die meisten Entwickler einig, dass es sich um einen Unit-Test handelt, und bei 
+letzterem, dass es sich um einen Integrationstest handelt. Das ist sicherlich nicht falsch. Es ist 
+aber auch nicht die ganze Wahrheit. Schauen wir uns dazu mal einen Test für eine Java-Klasse an, die 
+das allseits beliebte FizzBuzz-Problem löst.
+
+Der gesamte Code aus diesem Post steht im GitHub-Repo
+[fizzbuzz-testing-example](https://github.com/bbvch/fizzbuzz-testing-example)
+zum Ausprobieren zur Verfügung.
+
+
+```java
+public class FizzBuzz {
+    public List<String> go(int n) {
+        return IntStream.rangeClosed(1, n).mapToObj(this::fizzBuzz).toList();
+    }
+
+    private String fizzBuzz(int n) {
+        if (n % 3 == 0 && n % 5 == 0) return "FizzBuzz";
+        else if (n % 3 == 0) return "Fizz";
+        else if (n % 5 == 0) return "Buzz";
+        else return Integer.toString(n);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        var fizzBuzz = new FizzBuzz();
+        fizzBuzz.go(100).forEach(System.out::println);
+    }
+}
+
+class FizzBuzzTest {
+    @Test
+    void oneIs1() {
+        FizzBuzz fizzBuzz = new FizzBuzz();
+
+        var result = fizzBuzz.go(1);
+
+        assertEquals("1", result.getFirst());
+    }
+
+    // + eine Reihe ähnlicher Testfälle
+}
+```
+
+Vermutlich würde jeder zustimmen, dass das ein Unit-Test ist. Er instantiiert die Klasse, ruft eine 
+Methode auf, die nicht mit anderen Komponenten interagiert, und prüft das Ergebnis. Mehr nicht. … 
+Wirklich nicht? Was ist mit `IntStream`? Was ist mit `String` und `Integer`? Was 
+ist mit dem Java-Compiler? Und mit der Java-Runtime? All das ist nötig, um die Methode 
+`FizzBuzz.go(int)` wirklich auszuführen. Lassen wir etwas davon weg, ist das Programm nicht mehr 
+lauffähig. Ein Bug in jeder dieser Komponenten könnte den Test fehlschlagen lassen. Der Test läuft 
+nur erfolgreich durch, wenn all diese Komponenten fehlerfrei funktionieren.
+
+Lassen wir das erst mal sacken.
+
+„Aber die Sachen sind ja alle nicht von mir! Wenn mein Test von 3rd-Party-Zeug abhängt, soll das 
+heißen, _das_ ist ein _Integrationstest!?_“
+
+Ja, genau das soll es heißen. Genauer gesagt: _Jeder_ Test ist ein Integrationstest, denn _jeder_ 
+Test integriert etwas, die Frage ist nur, was. Somit ist auch jeder Unit-Test ein Integrationstest. 
+Er integriert alles, was Bestandteil der Unit ist, und lässt alles weg, was nicht Teil der Unit ist.
+Im Beispiel oben sind es die genannten externen Abhängigkeiten, aber der Test 
+integriert auch die Methoden `go(int)` und `fizzBuzz(int)`. Und auch die 
+Methoden der Standard-Library.
+
+Die spannende Frage ist also, …
+
+## Was ist eine Unit?
+
+Für unsere Zwecke ist eine _Unit_ eine in sich abgeschlossene Funktionseinheit
+mit definierten Abhängigkeiten und Ein- und Ausgängen.
+Units können als Teil einer größeren Unit zusammenarbeiten.
+Wir erweitern das FizzBuzz-Beispiel ein wenig, um einige Möglichkeiten
+aufzuzeigen:
+
+```java
+public interface Output {
+    String render();
+}
+
+public record NumberOutput(int number) implements Output {
+    @Override
+    public String render() { return Integer.toString(number); }
+}
+
+public enum FizzBuzzOutput implements Output {
+    FIZZ("Fizz"),
+    BUZZ("Buzz"),
+    FIZZBUZZ("FizzBuzz");
+
+    private final String representation;
+
+    FizzBuzzOutput(String representation) { this.representation = representation; }
+
+    @Override
+    public String render() { return representation; }
+}
+
+public interface Selector {
+    Output select(int n);
+}
+
+public class Does {
+    public boolean divide(int divisor, int n) { return (n % divisor == 0); }
+}
+
+public record SimpleSelector(Does does) implements Selector {
+    @Override
+    public Output select(int n) {
+        if (does.divide(3, n) && does.divide(5, n)) return FIZZBUZZ;
+        else if (does.divide(3, n)) return FIZZ;
+        else if (does.divide(5, n)) return BUZZ;
+        else return new NumberOutput(n);
+    }
+}
+
+public interface Streamer {
+    Stream<Output> go(int n);
+}
+
+public record AscendingStreamer(Selector selector) implements Streamer {
+    @Override
+    public Stream<Output> go(int n) {
+        return IntStream.rangeClosed(1, n).mapToObj(selector::select);
+    }
+}
+
+public record FizzBuzz(Streamer streamer) {
+    public List<String> go(int n) {
+        return streamer.go(n).map((output) -> {
+            if (output == FIZZBUZZ) return output.render().toUpperCase();
+            else return output.render();
+        }).toList();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        var fizzBuzz = new FizzBuzz(new AscendingStreamer(new SimpleSelector(new Does())));
+        fizzBuzz.go(100).forEach(System.out::println);
+    }
+}
+```
+
+Die neue Lösung trennt die Verantwortlichkeiten auf: Die Klasse `FizzBuzz` 
+verwendet nun einen `Streamer`, der bestimmt, mit welcher Zahl wir beginnen und 
+in welcher Reihenfolge die Zahlen abgearbeitet werden. `Streamer` wiederum 
+verwendet einen `Selector`, um zu ermitteln, was für eine Zahl tatsächlich 
+ausgegeben werden soll. `Selector` wiederum setzt auf der Hilfsklasse
+`Does`[^does] 
+auf, die die Teilbarkeitsprüfung übernimmt. Die Ausgaben werden typisiert 
+zurückgegeben. `FizzBuzz` selbst muss nun nur noch den `Stream` von `Output`s in 
+eine Liste von `String`s umwandeln, um die Schnittstelle beizubehalten.[^record]
+
+[^does]:
+    Die Namen `Does` und `divide` mögen etwas seltsam anmuten, ermöglichen 
+    aber im Client-Code die Formulierung `if (does.divide(3, n))`. Ob man die Namen 
+    dafür in Kauf nimmt, ist Geschmackssache.
+
+[^record]:
+    Die Verwendung von `record` statt `class` für `SimpleSelector`, 
+    `AscendingStreamer` und `FizzBuzz` dient hier nur der syntaktischen Kürzung für 
+    die Zwecke eines Blog-Posts und ist ansonsten nicht sinnvoll.
+
+Eine Erweiterung haben wir allerdings noch eingebaut: Wir wollen nämlich 
+„FizzBuzz“ in Großbuchstaben schreien und verwenden dazu ein zusätzliches 
+Mapping in der Klasse `FizzBuzz`.
+
+Um die Einzelteile zusammenzustöpseln, verwenden wir constructor-based 
+Dependency Injection und die Verwendung von Interfaces erlaubt es uns, die 
+Implementierungen einfach auszutauschen. Die Aufteilung ist allerdings ein rein 
+internes Implementierungsdetail und hat keine Auswirkung auf die Funktionalität. 
+Bis auf die Initialisierung sieht die `main`-Methode genauso aus wie vorher.
+
+Was sind hier nun die relevanten Units? Die reflexartige Antwort wäre: „Jede 
+Klasse ist eine Unit.“ Für den Unit-Test bedeutet das, dass wir die Klassen 
+einzeln testen und die Abhängigkeiten dabei weglassen. Wir verwenden dazu 
+[Mockito](https://site.mockito.org/) und außerdem 
+[AssertJ](https://assertj.github.io/doc/), um den Umgang mit Listen und Streams 
+in den Tests zu vereinfachen. Hier ein paar beispielhafte Tests:
+
+```java
+@ExtendWith(MockitoExtension.class)
+class SimpleSelectorTest {
+    @Mock
+    private Does does;
+
+    private SimpleSelector selector;
+
+    @BeforeEach
+    void setUp() {
+        selector = new SimpleSelector(does);
+    }
+
+    @Test
+    void modNothingYieldsNumber() {
+        when(does.divide(3, 1)).thenReturn(false);
+        when(does.divide(5, 1)).thenReturn(false);
+        assertThat(selector.select(1)).isEqualTo(new NumberOutput(1));
+    }
+
+    // …
+
+    @Test
+    void mod3AndMod5YieldsFizzBuzz() {
+        when(does.divide(3, 1)).thenReturn(true);
+        when(does.divide(5, 1)).thenReturn(true);
+        assertThat(selector.select(1)).isEqualTo(FIZZBUZZ);
+    }
+}
+```
+
+Dieser Test prüft die Auswahllogik und er tut dies direkter als der Test in der 
+vorigen Version, weil er das Ergebnis nicht mehr aus einer Liste herausholen 
+muss. Die Klasse `Does` ist weggemockt. Für die gibt es eigene Tests.
+
+```java
+@ExtendWith(MockitoExtension.class)
+class AscendingStreamerTest {
+    @Mock
+    private Selector selector;
+
+    private Streamer streamer;
+
+    @BeforeEach
+    void setUp() {
+        streamer = new AscendingStreamer(selector);
+    }
+
+    @Test
+    void returnsSelectedOutputsInOrder() {
+        when(selector.select(1)).thenReturn(new NumberOutput(1));
+        when(selector.select(2)).thenReturn(new NumberOutput(2));
+        when(selector.select(3)).thenReturn(FIZZ);
+
+        var stream = streamer.go(3);
+
+        assertThat(stream).containsExactly(new NumberOutput(1), new NumberOutput(2), FIZZ);
+    }
+}
+```
+
+Dieser Test prüft nur das Verhalten unserer Streamer-Implementierung. Der 
+Selector ist weggemockt.
+
+Und zu guter Letzt prüft der Test von `FizzBuzz` das Verhalten dieser Klasse, 
+wobei der Output, der aus dem Streamer stammt, durch Mockito vorgegeben wird:
+
+```java
+@ExtendWith(MockitoExtension.class)
+class FizzBuzzTest {
+    @Mock
+    private Streamer streamer;
+
+    private FizzBuzz fizzBuzz;
+
+    @BeforeEach
+    void setUp() {
+        fizzBuzz = new FizzBuzz(streamer);
+    }
+
+    @Test
+    void aggregates() {
+        when(streamer.go(1)).thenReturn(Stream.of(new NumberOutput(1), new NumberOutput(2), FIZZ));
+        assertThat(fizzBuzz.go(1)).containsExactly("1", "2", "Fizz");
+    }
+
+    @Test
+    void shoutsFIZZBUZZ() {
+        when(streamer.go(1)).thenReturn(Stream.of(FIZZBUZZ));
+        assertThat(fizzBuzz.go(1)).containsExactly("FIZZBUZZ");
+    }
+}
+```
+
+Die Tests laufen alle erfolgreich durch und wenn wir `Main.main()` ausführen, 
+sehen wir, dass auch im Zusammenspiel alles funktioniert.
+
+Der Ansatz „Unit = Klasse“ (oder auch „Unit = Methode“) ist im Java-Umfeld weit
+verbreitet. Tests dieser Art (auf Klassenebene mit weggemockten Dependencies)
+habe ich schon oft in unterschiedlichen Projekten gesehen. Und Dependency-Ketten
+sind durchaus üblich. Ein Beispiel in einem Microservice auf Basis
+Ports-and-Adapters-Architektur könnte sein (Pfeile sind Laufzeitabhängigkeiten):
+Web-Controller -> Driving Port -> Applikationsservice -> anderer Applikationsservice
+-> Domänenobjekt -> anderes Domänenobjekt -> Driven Port -> JDBC-Adapter.
+
+Natürlich ist FizzBuzz in seiner Gesamtheit auch eine Unit. In der ersten 
+Implementierung steckt der gesamte Code in einer Klasse, in der zweiten ist er 
+über mehrere Klassen verteilt, aber dennoch handelt es sich um eine funktionale 
+Einheit. In diesem Fall ist die Einheit recht klein und lässt sich auch in ihrer 
+Gesamtheit gut testen, in komplexeren Code-Basen können solche Gesamttests aber 
+recht langsam sein (looking at you, `@SpringBootTest`). Das ist der Punkt, an 
+dem die meisten Entwickler das Wort „Integrationstest“ ins Spiel bringen und 
+ablehnende Vibes zu spüren sind.
+
+Was passiert aber nun mit dem hier vorgestellten Testing-Stil, wenn wir 
+Änderungen vornehmen?
+
+## Eine kleine Änderung
+Nehmen wir an, der Auftraggeber für FizzBuzz möchte die Weichen für eine 
+strahlende Zukunft stellen, in der FizzBuzz nicht nur „fizzen“ und „buzzen“ 
+kann, sondern auch „zoomen“ und „boomen“ und noch viel mehr – und das nicht nur 
+bei 3 und 5, sondern bei beliebigen anderen Zahlen. Da dies dazu führen kann, 
+dass mehrere Zahlen bzw. deren Outputs kombiniert werden müssen, stoßen wir mit 
+unserem `FizzBuzzOutput`-Enum an die Grenzen. Da müssten wir ja nicht nur `ZOOM` 
+und `BOOM` als Werte hinzufügen, sondern auch alle möglichen Kombinationen. Um 
+die kombinatorische Explosion zu vermeiden, führen wir stattdessen einen 
+`CombinedOutput` ein:
+
+```java
+public record CombinedOutput(List<Output> outputs) implements Output {
+    public CombinedOutput(Output... outputs) { this(List.of(outputs)); }
+
+    @Override
+    public String render() { return outputs.stream().map(Output::render).collect(Collectors.joining("")); }
+}
+```
+
+Und verwenden diesen in unserem `SimpleSelector`:
+
+```diff
+<         if (does.divide(3, n) && does.divide(5, n)) return FIZZBUZZ;
+---
+>         if (does.divide(3, n) && does.divide(5, n)) return new CombinedOutput(FIZZ, BUZZ);
+
+```
+
+Und in dessen Test:
+
+```diff
+<         assertThat(selector.select(1)).isEqualTo(FIZZBUZZ);
+---
+>         assertThat(selector.select(1)).isEqualTo(new CombinedOutput(FIZZ, BUZZ));
+```
+
+Einmal die gesamte Test-Suite ausgeführt, und wir sehen, dass alle Tests 
+durchlaufen. Fein! Das wäre geschafft. Wir sind nun gut gerüstet für die 
+Einführung von `ZOOM` bei 7 oder was auch immer sonst daherkommen mag.
+Noch schnell in Produktion geschoben und das Sprint-Ziel ist erreicht. Oder der 
+im Werksvertrag vereinbarte Release-Umfang ist abgenommen. Oder so. Jedenfalls 
+sind wir fertig.
+
+-----------------------------------------------------
+
+**PAUSE**
+
+Bevor du weiterliest, überleg selbst mal, was gerade kaputtgegangen ist. Denn, 
+ja, es ist etwas kaputtgegangen. Ich habe aber nicht gelogen. Alle Tests laufen 
+ohne Fehler durch.
+
+-----------------------------------------------------
+
+Überlegt? Gut. Dann schauen wir es uns mal an. Was passiert, wenn wir 
+`Main.main()` ausführen?
+
+```
+1
+2
+Fizz
+```
+
+Bis hierher sieht es gut aus. Fizzen tut es.
+
+```
+4
+Buzz
+```
+
+Buzzen auch.
+
+```
+Fizz
+7
+8
+Fizz
+Buzz
+11
+Fizz
+13
+14
+FizzBuzz
+```
+
+Und FizzBuzzen tut es auch. Aber – moment mal! Sollte es nicht „FIZZBUZZ“ sein? 
+Da war doch diese SCHREI-Anforderung. Und ich weiß genau, dass es extra dafür 
+einen Test gibt. Ja, in `FizzBuzzTest`. Den schauen wir uns jetzt nochmal 
+genauer an.
+
+```java
+    @Test
+    void shoutsFIZZBUZZ() {
+        when(streamer.go(1)).thenReturn(Stream.of(FIZZBUZZ));
+        assertThat(fizzBuzz.go(1)).containsExactly("FIZZBUZZ");
+    }
+```
+
+Wenn der Streamer `FIZZBUZZ` liefert, soll „FIZZBUZZ“ herauskommen. Was ist also 
+das Problem? Das Problem ist, dass der Streamer in Produktion gar nicht mehr 
+`FIZZBUZZ` liefert, weil wir den Selector so geändert haben, dass er einen 
+`CombinedOutput` auswirft. Würde der Selector noch `FIZZBUZZ` auswerfen, würde 
+die Klasse `FizzBuzz` auch SCHREIEN. Aber das tut er nicht mehr.
+
+Da wir unsere Tests so auf die jeweilige Unit fokussiert haben – oder das, was 
+wir als Unit identifiziert haben, nämlich die Klasse –, waren sie nicht in der 
+Lage, diesen Mismatch aufzudecken. Ein umfassender Integrationstest hätte 
+geholfen, aber die sind ja teuer und langsam und werden daher erst relativ spät 
+im Entwicklungszyklus ausgeführt – oder auch ganz weggelassen, wenn die 
+Testabdeckung so schon gut ist. Und sie ist gut (100%).[^testabdeckung]
+
+[^testabdeckung]:
+    Ja, der Fehler wäre aufgefallen, wenn wir das überflüssige Enum 
+    `FIZZBUZZ` gleich gelöscht hätten. Dann hätte `FizzBuzzTest` nicht mehr 
+    kompiliert. Aber in großen Projekten ist es oft so, dass Änderungen nicht 
+    gleichzeitig über die gesamte Code-Basis durchgeführt werden und alte Klassen 
+    oder Werte daher vorerst erhalten bleiben.
+
+## Ein echtes Beispiel
+Natürlich ist das Beispiel konstruiert. Aber genau solche Fehler kommen auch in 
+der Praxis vor. Ein Fall, der mir persönlich schon begegnet ist, war die 
+Duplikatsprüfung an einer REST-Schnittstelle. Es gab einen Test für den 
+Datenbankadapter, der sichergestellt hat, dass eine `DuplicatePaymentException` 
+geworfen wurde, wenn beim Einfügen in die Datenbank der Unique-Constraint 
+verletzt war. Und es gab einen Test in der API-Schicht, der sichergestellt hat, 
+dass im Falle einer `DuplicatePaymentTransactionException` eine entsprechende 
+Meldung (HTTP-Status 409) an den Client erfolgt. In dem Projekt wurde 
+stark auf Mocking gesetzt, um die „Units“ in den Tests zu isolieren. Jeder der 
+Tests sah, für sich betrachtet, plausibel aus und war erfolgreich. Nur haben 
+Clients in Produktion öfter mal HTTP-Status 500 bekommen statt der erwarteten 
+Duplikatsfehlermeldung, da die `DuplicatePaymentException` unbehandelt 
+durchgeflogen ist. Die Ursache ist erst aufgefallen, als ich die Tests 
+nebeneinander gehalten habe. Da ist mir aufgefallen, dass hier unterschiedliche 
+Exceptions zum Einsatz kommen.
+
+## Das Problem bei zu eng gefassten Unit-Tests
+Das Grundproblem hier ist dasselbe wie im FizzBuzz-Beispiel: Der Test einer Unit 
+macht Annahmen über das Verhalten einer anderen Unit und kodiert sie fest in den 
+Test hinein, anstatt sie mit zu überprüfen. _Wenn_ der Streamer `FIZZBUZZ` 
+liefert, dann tut `FizzBuzz` das Richtige. Wenn er es aber nicht tut, hat der 
+Test keine Aussagekraft. _Wenn_ der Adapter eine 
+`DuplicatePaymentTransactionException` wirft, liefert die API die richtige 
+Antwort. Wenn er aber eine `DuplicatePaymentException` wirft, haben wir 
+verloren.
+
+Wir haben in unseren Tests versucht, Dinge unabhängig voneinander zu machen, die 
+in Wirklichkeit nicht unabhängig voneinander sind. Wenn sich aber das Verhalten 
+einer Dependency ändert, auf das sich die Implementierung unserer Unit verlässt, 
+wäre es schon gut, wenn wir einen Test haben, der fehlschlägt, wenn die Änderung 
+unsere Annahmen invalidiert.
+
+Also doch wieder zurück zum Monster-Integrationstest? Nicht unbedingt. Ich 
+schlage stattdessen überlappende Tests vor.
+
+## Überlappende Tests
+Solche Tests sind auch Unit-Tests. Wir wählen nur die Unit etwas anders.
+Bisher haben wir genau eine Klasse als Unit verwendet, mit Grenzen nach oben 
+(zum Aufrufer hin) und nach unten (zu den Dependencies hin). Wenn wir die Scopes 
+dieser Tests aufmalen, sind diese vollständig voneinander getrennt. Im folgenden 
+Bild umrahmt jeder Test die Klassen, die er abdeckt, nämlich genau eine. Die
+Pfeile zwischen den Klassen stellen die Laufzeitabhängigkeit dar.
+
+<TestScopesSeparateSvg
+  style={{
+    display: 'block',
+    margin: '2em auto',
+    maxWidth: '100%',
+    width: 600,
+    height: 'auto',
+  }}
+  alt="Das Bild zeigt die Klassen FizzBuzz, AscendingStreamer, SimpleSelector und Does sowie die dazugehörigen Testklassen. FizzBuzzTest rahmt FizzBuzz ein. AscendingStreamerTest rahmt AscendingStreamer ein. SimpleSelectorTest rahmt SimpleSelector ein und DoesTest rahmt Does ein. Der Abhängigkeitspfeil von FizzBuzz zeigt auf AscendingStreamer, der von AscendingStreamer auf SimpleSelector und der von SimpleSelector auf Does."
+/>
+
+Wie wir gesehen haben, ergibt sich durch diese scharfe Abgrenzung das Problem, 
+dass das Zusammenspiel ungetestet bleibt. Überlappende Tests lösen dies, indem 
+sie den Scope erweitern (also die Unit unter Betrachtung vergrößern), sodass 
+auch das Zusammenspiel der Klassen untereinander getestet wird. Bildlich 
+gesprochen, ist auch jeder Pfeil in mindestens einem Test-Scope enthalten. 
+Für unser Projekt „Over-engineered FizzBuzz“ kann das so aussehen:
+
+<TestScopesOverlappingSvg
+  style={{
+    display: 'block',
+    margin: '2em auto',
+    maxWidth: '100%',
+    width: 600,
+    height: 'auto',
+  }}
+  alt="Das Bild zeigt die Klassen FizzBuzz, AscendingStreamer, SimpleSelector und Does sowie die dazugehörigen Testklassen. FizzBuzzTest rahmt FizzBuzz, AscendingStreamer und SimpleSelector ein. AscendingStreamerTest rahmt AscendingStreamer, SimpleSelector und Does ein. SimpleSelectorTest rahmt SimpleSelector und Does ein und DoesTest rahmt nur Does ein. Die Abhängigkeitspfeile von FizzBuzz auf AscendingStreamer, von AscendingStreamer auf SimpleSelector und von SimpleSelector auf Does liegen nun innerhalb der Testrahmen."
+/>
+
+Und hier ist der Code dazu:
+
+```java
+class SimpleSelectorTest {
+    private final SimpleSelector selector = new SimpleSelector(new Does());
+
+    @Test
+    void oneIs1() {
+        assertThat(selector.select(1)).isEqualTo(new NumberOutput(1));
+    }
+
+    // …
+
+    @Test
+    void fifteenIsFizzBuzz() {
+        assertThat(selector.select(15)).isEqualTo(new CombinedOutput(FIZZ, BUZZ));
+    }
+}
+```
+
+Hier wird `Does` nicht mehr weggemockt, wodurch der Testcode sogar kürzer
+wird.[^does-test]
+
+[^does-test]:
+    Der Test von `Does` selbst bleibt gleich. Hier gibt es ohnehin keine Abhängigkeiten.
+
+```java
+class AscendingStreamerTest {
+    @Test
+    void returnsSelectedOutputsInOrder() {
+        var streamer = new AscendingStreamer(new SimpleSelector(new Does()));
+
+        var stream = streamer.go(15);
+
+        assertThat(stream).containsExactly(
+            n(1), n(2), FIZZ, n(4), BUZZ, FIZZ, n(7), n(8), FIZZ, BUZZ, n(11), FIZZ, n(13), n(14), FIZZBUZZ
+        );
+    }
+
+    private NumberOutput n(int n) { return new NumberOutput(n); }
+}
+```
+
+Hier wird der Selector auch nicht mehr gemockt (und `Does` auch nicht – das 
+könnten wir zwar tun, hätten aber keinen Vorteil davon). Im Test müssen alle 
+möglichen Outputs vorkommen, die uns wichtig sind, daher geht der Test bis 15. 
+Da kommt zum ersten Mal `FIZZBUZZ`. Dies stellt sicher, dass der Streamer für 
+alle `Output`s funktioniert, die `SimpleSelector` liefert. In der 
+Testimplementierung mit Mocking ist das sinnlos, da der Test selbst definiert, 
+was der Streamer liefert. Er enthält sozusagen den Pfeil nicht. Dieser Test tut 
+das schon.
+
+```java
+@ExtendWith(MockitoExtension.class)
+class FizzBuzzTest {
+    @Mock
+    private Does does;
+
+    private FizzBuzz fizzBuzz;
+
+    @BeforeEach
+    void setUp() {
+        fizzBuzz = new FizzBuzz(new AscendingStreamer(new SimpleSelector(does)));
+    }
+
+    @Test
+    void aggregates() {
+        when(does.divide(3, 1)).thenReturn(false);
+        when(does.divide(5, 1)).thenReturn(false);
+        when(does.divide(3, 2)).thenReturn(false);
+        when(does.divide(5, 2)).thenReturn(false);
+        when(does.divide(3, 3)).thenReturn(true);
+        when(does.divide(5, 3)).thenReturn(false);
+
+        assertThat(fizzBuzz.go(3)).containsExactly("1", "2", "Fizz");
+    }
+
+    @Test
+    void shoutsFIZZBUZZ() {
+        when(does.divide(3, 1)).thenReturn(true);
+        when(does.divide(5, 1)).thenReturn(true);
+
+        assertThat(fizzBuzz.go(1)).containsExactly("FIZZBUZZ");
+    }
+}
+```
+
+In diesem Test wird `Does` gemockt. Er reicht also nicht bis zum Ende der 
+Dependency-Chain (sonst wäre es ein vollständiger Integrationstest).
+Er muss aber weit genug reichen, um die für ihn interessante 
+Verhaltensunterschiede in den Dependencies abzudecken. In unserem Fall heißt 
+das, der Selector muss noch mit rein, da der bestimmt, welche `Output`s in 
+`FizzBuzz` ankommen können. So bekommen wir einen Test, der fehlschlägt, wenn 
+wir den Selector von `FizzBuzzOutput.FIZZBUZZ` auf `CombinedOutput` umstellen 
+und dadurch unser SCHREI-Feature kaputtgeht.
+
+Wo genau man die Scope-Grenzen für die Tests setzt, um einen Mittelweg zwischen 
+scharf abgegrenzten Tests und allumfassenden Integrationstests zu finden, ist 
+ein wenig Erfahrungssache. Es gibt jedoch ein paar Heuristiken.
+
+Eine Dependency mit einer stabilen Schnittstelle kann besser weggemockt werden, 
+ohne Sicherheit zu verlieren. Die Schnittstelle von `Does` ist sehr stabil, da 
+sie auf mathematischen Regeln beruht, und kann somit gemockt werden, ohne Gefahr 
+zu laufen, von Änderungen überrascht zu werden. In diesem Beispiel ist das 
+tatsächlich nicht ganz so sinnvoll, da sie eigentlich schnell genug ist und wir 
+durch das Mocking nicht wirklich etwas gewinnen. Wenn wir uns aber vorstellen, 
+dass es sich um eine Web-Schnittstelle handelt, die langsam und ein wenig 
+unzuverlässig ist, aber einen stabilen Schnittstellenkontrakt hat, ergibt es 
+wesentlich mehr Sinn.
+
+## Ein größeres Beispiel
+Das Konzept mit den überlappenden Tests lässt sich nicht nur auf Unit-Tests 
+innerhalb eines Stücks Software anwenden, sondern auch auf Integrationstests 
+zwischen mehreren Services. Ein Beispiel, bei dem wir es erfolgreich angewendet 
+haben, war die Integration mehrerer Services mit Zahlungsdienstleistern 
+über eine dedizierte Schnittstellenkomponente.
+
+Jeder Service hatte natürlich Tests für sich selbst und auch die 
+Zahlungskomponente hatte Tests für sich selbst. Große Integrationstests, bei 
+denen ein Service mit der Zahlungskomponente _und_ den Zahlungsdienstleistern 
+integriert war, waren schwierig, da die Anbindung an die Testumgebungen der 
+Zahlungsdienstleister nicht besonders stabil war und daher solche Tests oft 
+durch temporäre Probleme gestört waren. Darum haben wir als Entwickler der 
+Zahlungskomponente mit den Services vereinbart, dass sie für den Großteil ihrer 
+Tests Fake-Zahlungsmittel verwenden, bei denen die Anbindung an den 
+Zahlungsdienstleister abgeklemmt war. So konnten sie ungestört testen. Da sich 
+die Test-Scopes, wie im Bild zu sehen, überlappt haben, war trotzdem 
+sichergestellt, dass das Gesamtkonstrukt funktioniert.
+
+Das folgende Bild zeigt eine Übersicht der überlappenden Tests. Orange 
+dargestellte Tests liegen in der Obhut des Zahlungskomponententeams, blau 
+dargestellte bei den Serviceteams.[^payment-note]
+
+[^payment-note]:
+    Die Zahlungsdienstleister liegen im Bild nur halb im Test-Scope, da 
+    deren Testumgebungen mit diversen Einschränkungen behaftet sind, sodass auch die 
+    Integrationstests nicht alles abdecken. Ja, das hat Probleme verursacht. Ja, wir 
+    haben auch in Produktion getestet.
+
+<PaymentTestsSvg
+  style={{
+    display: 'block',
+    margin: '2em auto',
+    maxWidth: '100%',
+    width: 800,
+    height: 'auto',
+  }}
+  alt="Das Bild zeigt die überlappenden Test-Scopes der Zahlungskomponente. Die einzelnen Bestandteile der Zahlungskomponente sind mit eigenen Unit-Tests versehen. Interne Ende-zu-Ende-Tests umfassen das Zusammenspiel der internen Bausteine miteinander und mit der Datenbank. Integrationstests, die das Zahlungskomponententeam durchführt, umfassen die gesamte Zahlungskomponente und die Verbindungen zu den Zahlungsdienstleistern, die in der Testumgebung jedoch nur bedingt zuverlässig funktionieren. Die angeschlossenen Services haben auch Tests, die von den jeweiligen Serviceteams durchgeführt werden. Bei diesen sind jedoch die Zahlungsdienstleister und deren Adapter innerhalb der Zahlungskomponente abgeklemmt und werden durch eine Fake-Zahlungsmittel-Implementierung ersetzt. Im Bild ist zu sehen, dass auch ohne allumfassenden Integrationstest alle Abhängigkeitspfeile zwischen den einzelnen Komponenten durch mindestens einen Test abgedeckt sind."
+/>
+
+Zusätzlich zu den im Bild gezeigten Tests gibt es weitere überlappende Tests 
+innerhalb der Zahlungskomponente. Und auch die einzelnen Bausteine im Bild 
+bestehen aus mehreren Units, die teils scharf abgegrenzt, teils überlappend 
+getestet werden. Insgesamt erreicht die Zahlungskomponente so eine sehr gute 
+Testabdeckung – viel besser, als sie mit vollständig isolierten Unit-Tests zu 
+erreichen wäre, auch wenn man diese mit „großen“ Integrationstests ergänzen 
+würde.
+
+## Fazit
+Unit-Tests und Integrationstests sind nicht scharf voneinander abgrenzbar – und 
+schon gar kein Widerspruch. Units können unterschiedlich groß sein. Sie grenzen 
+sich einerseits gegen andere Units ab und integrieren andererseits die 
+Bestandteile innerhalb der Unit. Units nur auf einer Ebene zu betrachten (z. B. 
+nur Unit = Klasse) und scharf abgegrenzt zu testen, führt zu Testlücken und in 
+Folge zu Bugs.
+
+Überlappende Tests schließen diese Testlücken und helfen gleichzeitig dabei, 
+aufwändige, langsame und teure _allumfassende_ Integrationstests zu vermeiden.
+
+In diesem Sinne: Happy Testing!

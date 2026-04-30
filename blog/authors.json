@@ -59,5 +59,18 @@
       "linkedin": "oliver-with",
       "github": "quattervals"
     }
+  },
+  "sebastianhans": {
+    "name": "Sebastian Hans",
+    "title": "Senior Software Engineer & Architect",
+    "description": "Sebastian Hans is a Senior Software Engineer and Architect at bbv Software Services GmbH. Having worked in different roles and with a variety of technologies, he believes that the technology itself is not actually that important. His focus is on quality and the socio-technical aspects of software development.",
+    "url": "https://www.sebastian-hans.de/",
+    "imageURL": "/img/authors/SebastianHans.jpg",
+    "page": true,
+    "image": "",
+    "socials": {
+      "github": "sebastian-hans-bbv",
+      "mastodon": "https://hachyderm.io/@sebhans"
+    }
   }
 }
