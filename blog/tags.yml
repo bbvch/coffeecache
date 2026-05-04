@@ -10,6 +10,10 @@ cloud-native:
   label: Cloud Native
   permalink: /cloud-native
 
+testing:
+  label: Testing
+  permalink: /testing
+
 well-architected:
   label: Well-Architected
   permalink: /well-architected
