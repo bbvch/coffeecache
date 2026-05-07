@@ -14,10 +14,78 @@ well-architected:
   label: Well-Architected
   permalink: /well-architected
 
-rust:
+Rust:
   label: Rust
   permalink: /rust
 
-c++:
+'C++':
   label: C++
   permalink: /cpp
+
+'C#':
+  label: C#
+  permalink: /csharp
+
+'Azure DevOps':
+  label: Azure DevOps
+  permalink: /azure-devops
+
+'Project Structure':
+  label: Project Structure
+  permalink: /project-structure
+
+Agile:
+  label: Agile
+  permalink: /agile
+
+'Area Paths':
+  label: Area Paths
+  permalink: /area-paths
+
+Iterations:
+  label: Iterations
+  permalink: /iterations
+
+'Team Configuration':
+  label: Team Configuration
+  permalink: /team-configuration
+
+'Team Collaboration':
+  label: Team Collaboration
+  permalink: /team-collaboration
+
+code-quality:
+  label: code-quality
+  permalink: /code-quality
+
+static-analysis:
+  label: static-analysis
+  permalink: /static-analysis
+
+architecture-testing:
+  label: architecture-testing
+  permalink: /architecture-testing
+
+pit-of-success:
+  label: pit-of-success
+  permalink: /pit-of-success
+
+'Conventional Commits':
+  label: Conventional Commits
+  permalink: /conventional-commits
+
+SemVer:
+  label: SemVer
+  permalink: /semver
+
+Git:
+  label: Git
+  permalink: /git
+
+'Pull Requests':
+  label: Pull Requests
+  permalink: /pull-requests
+
+DevOps:
+  label: DevOps
+  permalink: /devops
